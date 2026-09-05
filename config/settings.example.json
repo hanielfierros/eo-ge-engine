@@ -9,6 +9,6 @@
     }
   },
   "authentication": {
-    "note": "El token de CDSE (OpenID Connect) se lee de la variable de entorno CDSE_TOKEN. NO se almacenan credenciales en este archivo ni en Git."
+    "note": "La descarga de assets Sentinel-2 requiere un access token OIDC de CDSE. Endpoint oficial: https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token (NO https://copernicus.eu). El conector lee CDSE_TOKEN (alias CDSE_ACCESS_TOKEN). Password grant (client_id=cdse-public) o client_credentials (OAuth client de la cuenta) sirven para obtener el access token fuera de EO-GE. NO se almacenan client_secret, usuario, password ni tokens en este archivo ni en Git."
   }
 }

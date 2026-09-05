@@ -218,17 +218,39 @@ class Catalog:
         href = asset.get("href")
         if href:
             validate_safe_path(str(href))
-        self._conn.execute(
-            """
-            INSERT INTO assets (item_id, asset_key, href, media_type, role, title, size, checksum, format)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                item_id, asset.get("asset_key"), href, asset.get("media_type"),
-                asset.get("role"), asset.get("title"), asset.get("size"),
-                asset.get("checksum"), asset.get("format"),
-            ),
+        key = asset.get("asset_key")
+        existing = [a for a in self._get_assets(item_id) if a.get("asset_key") == key]
+        params = (
+            href, asset.get("media_type"), asset.get("role"), asset.get("title"),
+            asset.get("size"), asset.get("checksum"), asset.get("format"),
+            item_id, key,
         )
+        if existing:
+            if (
+                existing[0].get("href") == href
+                and existing[0].get("checksum") == asset.get("checksum")
+                and existing[0].get("size") == asset.get("size")
+            ):
+                return
+            self._conn.execute(
+                """
+                UPDATE assets SET href=?, media_type=?, role=?, title=?, size=?, checksum=?, format=?
+                WHERE item_id=? AND asset_key=?
+                """,
+                params,
+            )
+        else:
+            self._conn.execute(
+                """
+                INSERT INTO assets (item_id, asset_key, href, media_type, role, title, size, checksum, format)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    item_id, key, href, asset.get("media_type"),
+                    asset.get("role"), asset.get("title"), asset.get("size"),
+                    asset.get("checksum"), asset.get("format"),
+                ),
+            )
         self._conn.commit()
 
     def _same_essential(self, existing: dict[str, Any], item: dict[str, Any]) -> bool:

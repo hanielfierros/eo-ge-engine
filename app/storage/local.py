@@ -98,6 +98,22 @@ class LocalDataStore(DataStore):
             shutil.rmtree(staging, ignore_errors=True)
             raise
 
+    def update_metadata(self, deterministic_id: str, metadata: dict[str, Any]) -> None:
+        """Sustituye metadata.json sin borrar archivos ni el manifiesto.
+
+        Para ingestion incremental (mismo Item, mas assets). No recrea el producto.
+        """
+        validate_id(deterministic_id)
+        if not self.exists(deterministic_id):
+            raise StorageNotFoundError(f"producto no encontrado: {deterministic_id}")
+        errors = validate_against_contract(metadata)
+        if errors:
+            raise StorageError("metadata INVALID (no se persiste): " + "; ".join(errors))
+        existing = self.get_metadata(deterministic_id)
+        if existing == metadata:
+            return
+        _atomic_write_json(self._product_dir(deterministic_id) / METADATA_FILENAME, metadata)
+
     def get_metadata(self, deterministic_id: str) -> dict[str, Any] | None:
         p = self._product_dir(deterministic_id) / METADATA_FILENAME
         if not p.exists():

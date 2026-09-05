@@ -39,19 +39,25 @@ Consulta por AOI (bbox), intervalo temporal, y límite de resultados. El
 
 ## 7. Autenticación
 
-La descarga requiere autenticación:
-- Assets de bandas/metadata: `s3://` (credenciales S3 de CDSE).
-- Asset `Product`: URL OData `https://download.dataspace.copernicus.eu/odata/...`
-  que requiere token OpenID Connect (401 sin token).
+El catálogo STAC (`POST /v1/search`) es público. La **descarga** de bytes
+requiere OIDC:
 
-El token se lee de la variable de entorno `CDSE_TOKEN`. No se almacenan
-credenciales en el código ni en Git.
+- El href primario de las bandas es `s3://eodata/...` (`auth:refs: s3`).
+- CDSE publica `alternate.https.href` (OData Node `$value`) con `auth:refs: oidc`.
+- Sin Bearer token, ese HTTPS responde **HTTP 401**.
+- El token se lee de `CDSE_TOKEN` (alias `CDSE_ACCESS_TOKEN`). Vacío = ausente.
+- No se almacenan credenciales en código, metadata, logs ni Git.
 
 ## 8. Descarga
 
-`download(ref, dest, asset_name)` descarga un asset por su `href` (solo
-esquema HTTP(S)). Los assets `s3://` no están soportados en S-A.6
-(`UnsupportedAssetError`).
+`download(ref, dest, asset_name)` (S-A.15):
+
+1. Si el href primario es HTTP(S), se usa.
+2. Si es `s3://`, se usa **solo** un `alternate.*.href` HTTP(S) declarado por STAC.
+3. No se inventa `s3://bucket/key → https://...`.
+4. Sin alternate HTTPS oficial: `UnsupportedAssetError`.
+5. Si el asset/alternate declara `oidc` y no hay token: `AuthenticationError` (fail-fast).
+6. Escritura atómica: `*.part` → verify → rename. Retry en 429/5xx/timeout/integridad transitoria. 401/403/404 no reintentan.
 
 ## 9. Retry
 
@@ -81,9 +87,9 @@ HTTP). No dependen de CDSE.
 
 ## 14. Limitaciones
 
-- Solo HTTP(S) para descarga; S3 no implementado.
-- La descarga real requiere credenciales CDSE (no disponibles en desarrollo).
-- No se implementó el Normalizer (pertenece a S-A.7).
+- Cliente S3 no implementado; la vía oficial usada es HTTPS OData (`alternate.https`).
+- La descarga real requiere `CDSE_TOKEN` (OIDC). Sin token el estado es BLOCKED.
+- No se calcula NDVI ni se aplica `raster:scale`/`offset` en el conector.
 
 ## 15. Ejemplo de ejecución
 

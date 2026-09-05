@@ -66,6 +66,7 @@ class DiscoveryQuery:
     datetime: str | None = None
     cloud_cover_max: float | None = None
     limit: int = 10
+    ids: list[str] | None = None
 
 
 @dataclass
@@ -85,6 +86,7 @@ class DownloadedResource:
     checksum_algo: str = "sha256"
     asset_name: str | None = None
     source_url: str | None = None
+    checksum_verification: str | None = None  # OFFICIAL_SHA256_MATCH | SHA-256_LOCAL
 
 
 @dataclass

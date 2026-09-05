@@ -5,10 +5,16 @@ from __future__ import annotations
 from typing import Any
 
 
-def normalized_to_item(metadata: dict[str, Any], storage_path: str | None = None) -> dict[str, Any]:
+def normalized_to_item(
+    metadata: dict[str, Any],
+    storage_path: str | None = None,
+    materialized_files: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Convierte un producto normalizado EO-GE en un Item tipo STAC.
 
     No modifica el metadata.json; solo deriva la representacion de catalogo.
+    `materialized_files` asocia asset_key -> {href, media_type, size, checksum, format}
+    para assets fisicamente almacenados. Sin ello, las bandas quedan sin href.
     """
     identity = metadata.get("identity", {})
     source = metadata.get("source", {})
@@ -21,7 +27,7 @@ def normalized_to_item(metadata: dict[str, Any], storage_path: str | None = None
     dataset_quality = quality.get("dataset_quality") or {}
     cloud_cover = dataset_quality.get("cloud_cover_percent")
 
-    assets = _build_assets(metadata, storage_path)
+    assets = _build_assets(metadata, storage_path, materialized_files)
 
     return {
         "id": identity.get("id"),
@@ -50,8 +56,13 @@ def normalized_to_item(metadata: dict[str, Any], storage_path: str | None = None
     }
 
 
-def _build_assets(metadata: dict[str, Any], storage_path: str | None) -> list[dict[str, Any]]:
+def _build_assets(
+    metadata: dict[str, Any],
+    storage_path: str | None,
+    materialized_files: dict[str, dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     assets: list[dict[str, Any]] = []
+    materialized = dict(materialized_files or {})
     if storage_path:
         assets.append({
             "asset_key": "metadata",
@@ -64,13 +75,39 @@ def _build_assets(metadata: dict[str, Any], storage_path: str | None) -> list[di
     data = metadata.get("data", {})
     storage = data.get("storage", {}) or {}
     bands = (data.get("raster") or {}).get("bands", [])
+    used_keys: set[str] = set()
     for b in bands:
-        assets.append({
-            "asset_key": b.get("name"),
-            "href": None,  # el raster no esta materializado aun
+        name = b.get("name")
+        mat = None
+        if name in materialized:
+            mat = materialized[name]
+            used_keys.add(name)
+        asset = {
+            "asset_key": name,
+            "href": None,
             "media_type": None,
             "role": "data",
-            "title": b.get("name"),
+            "title": name,
             "format": storage.get("format"),
-        })
+        }
+        if mat:
+            asset.update({k: v for k, v in mat.items() if v is not None})
+            asset["asset_key"] = mat.get("asset_key") or name
+            asset["role"] = mat.get("role") or "data"
+        assets.append(asset)
+
+    for key, mat in materialized.items():
+        if key in used_keys:
+            continue
+        if any(a.get("asset_key") == key for a in assets):
+            continue
+        extra = {
+            "asset_key": key,
+            "href": None,
+            "media_type": None,
+            "role": mat.get("role") or "data",
+            "title": mat.get("title") or key,
+        }
+        extra.update({k: v for k, v in mat.items() if v is not None})
+        assets.append(extra)
     return assets
