@@ -1,11 +1,53 @@
 {
   "metadata": {
     "schema_version": "1.0",
-    "project_version": "0.15",
-    "memory_version": "1.15",
+    "project_version": "0.16",
+    "memory_version": "1.18",
     "created_at": "2026-09-05T03:40:03Z",
-    "last_updated": "2026-09-05T06:50:00Z",
+    "last_updated": "2026-09-05T19:55:00Z",
     "file_purpose": "MEMORIA OPERATIVA, ARQUITECTONICA Y DE RECUPERACION del proyecto EO-GE ENGINE. Fuente prioritaria de contexto para futuras sesiones de IA."
+  },
+  "current_phase": {
+    "phase": "S-A.15",
+    "name": "Sentinel-2 Real Ingestion Recovery",
+    "status": "COMPLETED",
+    "result": "PASS",
+    "closed": true,
+    "subphase": "S-A.15.1",
+    "subphase_status": "COMPLETED",
+    "authentication_status": "OIDC_TOKEN_ACCEPTED",
+    "access_mechanism": "STAC alternate.https.href + OIDC Bearer (OData download.dataspace.copernicus.eu)",
+    "product_id": "S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+    "item_id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1",
+    "asset": "B04_10m+B08_10m",
+    "b04_b08_materialized": true,
+    "integrity_verified": true,
+    "catalog_consistent": true,
+    "bytes": 44822636,
+    "checksum": "bf94442d24e568e478290970a6037ea77c6af47e673cffb748cca36b17b18687",
+    "checksum_verification": "OFFICIAL_SHA3_256_MATCH",
+    "storage": "storage/normalized/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1/files/",
+    "catalog": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1",
+    "recovery": "ATOMIC_STAGING_AND_IDEMPOTENT_REUSE",
+    "tests": "189 passed, 0 failed, 0 errors, 1 skipped",
+    "multi_asset": "INGEST_INCREMENTAL — same Item can accumulate B04 then B08 without delete",
+    "real_b08_ingestion": "COMPLETED",
+    "real_b08_bytes": 47052534,
+    "real_b08_checksum": "82395f6a56307a505d0e508b64a5ae679046cc879897ac1250ba574f7b29a970",
+    "real_b08_checksum_verification": "OFFICIAL_SHA3_256_MATCH",
+    "real_b08_blocker": null,
+    "s_a16": "NOT_STARTED",
+    "blockers": [],
+    "warnings": [
+      "rasterio no anadido; magic JP2 + metadata STAC + checksum oficial",
+      "file:checksum CDSE es sha3-256 (multihash 1620); SHA-256 local tambien registrado",
+      "cliente S3 no implementado",
+      "https://copernicus.eu no es el endpoint OIDC"
+    ],
+    "docs": [
+      "docs/S_A15_SENTINEL2_REAL_INGESTION.md",
+      "reports/S_A15_SENTINEL2_INGESTION_REPORT.md"
+    ]
   },
   "project": {
     "name": "EARTH OBSERVATION & GEOSPATIAL INTELLIGENCE ENGINE",
@@ -671,6 +713,22 @@
       "status": "COMPLETED"
     },
     {
+      "phase": "S-A.15",
+      "name": "Sentinel-2 Real Ingestion Recovery",
+      "status": "COMPLETED",
+      "result": "PASS"
+    },
+    {
+      "phase": "S-A.15.1",
+      "name": "Multi-Asset Sentinel-2 Ingestion Correction",
+      "status": "COMPLETED"
+    },
+    {
+      "phase": "S-A.16",
+      "name": "NOT STARTED",
+      "status": "NOT_STARTED"
+    },
+    {
       "phase": "S-B.0",
       "name": "Interpretation Architecture",
       "status": "NOT_STARTED"
@@ -1040,6 +1098,60 @@
         "catalog/ y storage/ sin anclar (habria excluido codigo)"
       ],
       "impact": "Codigo fuente y documentacion publicos; siguiente fase S-B.0 no iniciada.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-026",
+      "date": "2026-09-05",
+      "decision": "S-A.15: materializar Sentinel-2 L2A via alternate.https.href oficial (OData + OIDC Bearer CDSE_TOKEN). No inventar URLs s3→https. No cliente S3. Checksum local SHA-256; checksum CDSE file:checksum 1620 = sha3-256 comparado aparte. Ingesta minima de un asset (B04_10m). Sin token: BLOCKED_BY_EXTERNAL_ACCESS.",
+      "rationale": "STAC declara alternate HTTPS con auth oidc; el 401 es ausencia de token, no un endpoint incorrecto. STAC Item no equivale a bytes cientificos.",
+      "alternatives_considered": [
+        "cliente S3 boto3",
+        "concatenar s3://eodata a un host HTTPS adivinado",
+        "desactivar validacion HTTP 401",
+        "descargar el SAFE completo"
+      ],
+      "impact": "Conector e ingesta listos para un asset real cuando exista CDSE_TOKEN. S-A.16 no iniciada.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-027",
+      "date": "2026-09-05",
+      "decision": "S-A.15.1: ingest_sentinel2_asset es incremental. No se llama store.delete() al anadir un segundo asset. Metadata de bandas se fusiona; Catalog.register_asset es idempotente. Un Item puede contener B04 y B08.",
+      "rationale": "La ingestion de B08 sobre el mismo deterministic_id destruia B04 (producto considerado no intacto). Multi-asset es requisito antes de una descarga real de B08.",
+      "alternatives_considered": [
+        "borrar y recrear el producto",
+        "un Item por banda",
+        "cambiar el contrato V1.0"
+      ],
+      "impact": "B04 real conservado. B08 real no descargado. S-A.16 no iniciada.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-028",
+      "date": "2026-09-05",
+      "decision": "S-A.15 B08: detener la ingestion real ante HTTP 401 DAT-ZIP-609 (Token audience not allowed) con CDSE_TOKEN presente. No solicitar token nuevo, no password grant, no client_credentials, no S3. Conservar B04. No iniciar S-A.16.",
+      "rationale": "El token existia y no estaba caducado, pero CDSE rechazo la audiencia para OData Nodes $value. Inventar otra via de acceso o autenticacion viola las reglas de S-A.15.",
+      "alternatives_considered": [
+        "obtener un token nuevo por client_credentials o password grant",
+        "usar zipper.dataspace.copernicus.eu en lugar del alternate.https STAC",
+        "cliente S3"
+      ],
+      "impact": "B08 no materializado. Catalogo y B04 intactos. S-A.16 no iniciada.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-029",
+      "date": "2026-09-05",
+      "decision": "S-A.15.1 B08 real: materializar B08_10m.jp2 de forma incremental sobre el mismo Item SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1 via alternate.https.href OData + Bearer CDSE_TOKEN. No reemplazar el Item. No redescargar B04. No iniciar S-A.16.",
+      "rationale": "Una sonda OData previa devolvio HTTP 200 con el token OIDC regenerado. La ingestion incremental ya existia. El 401 DAT-ZIP-609 anterior era audiencia del token, no un fallo de discovery ni de B04.",
+      "alternatives_considered": [
+        "password grant o client_credentials adicionales",
+        "cliente S3",
+        "zipper.dataspace.copernicus.eu",
+        "recrear el Item completo"
+      ],
+      "impact": "Item con B04_10m.jp2 y B08_10m.jp2. B04 intacto (44822636 / bf94442d...). B08 47052534 bytes SHA-256 82395f6a... OFFICIAL_SHA3_256_MATCH. S-A.16 no iniciada.",
       "status": "DECIDED"
     }
   ],
@@ -1588,19 +1700,19 @@
     }
   },
   "session_recovery": {
-    "current_phase": "S-A.14",
-    "current_task": "GITHUB_RELEASE",
-    "last_completed_task": "S-A.14 (GitHub Release)",
-    "next_task": "INTERPRETATION_ARCHITECTURE",
+    "current_phase": "S-A.15",
+    "current_task": "S_A15_FORMAL_CLOSE",
+    "last_completed_task": "S-A.15 COMPLETED / PASS (B04+B08 materializados, integridad verificada, Catalog consistente, 189 passed / 1 skipped)",
+    "next_task": "INTERPRETATION_ARCHITECTURE (S-B.0). S-A.16 NOT_STARTED",
     "blocking_issue": "NONE",
     "files_modified": [
-      "README.md",
-      ".gitignore",
-      "EARTH_OBSERVATION_PROJECT_STATE.json"
+      "EARTH_OBSERVATION_PROJECT_STATE.json",
+      "docs/S_A15_SENTINEL2_REAL_INGESTION.md",
+      "reports/S_A15_SENTINEL2_INGESTION_REPORT.md"
     ],
-    "tests_last_run": "155 passed / 0 failed / 0 errors (python -m unittest discover -s tests -p test_*.py -v)",
-    "last_known_result": "S-A.14 COMPLETED. Release b26b7f1 (61 files). Memory be3af2a. Playbook 90c687d. S-A.13 APPROVED_WITH_WARNINGS. HIGH F-01/F-02 aceptados. S-B.0 NO iniciada. Bitacora: github_release.",
-    "instructions_for_next_session": "Leer EARTH_OBSERVATION_PROJECT_STATE.json seccion github_release. Continuar en S-B.0 (Interpretation Architecture). NO modificar el contrato V1.0 ni Radar Engine. NO descargar datasets. NO repetir git init. HIGH F-01/F-02 siguen aceptados."
+    "tests_last_run": "189 passed, 0 failed, 0 errors, 1 skipped",
+    "last_known_result": "S-A.15 PASS / CLOSED. Item SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1 con B04_10m.jp2 y B08_10m.jp2. Catalog consistente. 189 passed / 1 skipped. S-A.16 NOT_STARTED.",
+    "instructions_for_next_session": "S-A.15 cerrada. NO iniciar S-A.16 salvo orden explicita. NO modificar BRAIN_00, BRAIN_01 ni Radar Engine. NO redescargar B04/B08 salvo integridad rota. Siguiente fase planificada: S-B.0."
   },
   "technical_audit": {
     "phase": "S-A.13",
