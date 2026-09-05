@@ -1,10 +1,10 @@
 {
   "metadata": {
     "schema_version": "1.0",
-    "project_version": "0.14",
-    "memory_version": "1.13",
+    "project_version": "0.15",
+    "memory_version": "1.14",
     "created_at": "2026-09-05T03:40:03Z",
-    "last_updated": "2026-09-05T06:30:00Z",
+    "last_updated": "2026-09-05T06:40:00Z",
     "file_purpose": "MEMORIA OPERATIVA, ARQUITECTONICA Y DE RECUPERACION del proyecto EO-GE ENGINE. Fuente prioritaria de contexto para futuras sesiones de IA."
   },
   "project": {
@@ -92,7 +92,7 @@
     "09_INTERPRETATION": {"name": "Futuro motor de interpretacion", "status": "NOT_STARTED"},
     "10_TESTS": {"name": "Pruebas automatizadas", "status": "READY_FOR_REVIEW"},
     "11_AUDIT": {"name": "Auditorias tecnicas", "status": "APPROVED_WITH_WARNINGS"},
-    "12_DOCUMENTATION": {"name": "Documentacion", "status": "IN_PROGRESS"}
+    "12_DOCUMENTATION": {"name": "Documentacion", "status": "READY_FOR_REVIEW"}
   },
   "sources": {
     "priority_to_investigate": {
@@ -207,6 +207,13 @@
     "guardar secretos o API keys en GitHub"
   ],
   "github": {
+    "repository": "https://github.com/hanielfierros/eo-ge-engine",
+    "remote": "https://github.com/hanielfierros/eo-ge-engine.git",
+    "branch": "main",
+    "release_commit": "b26b7f1f4e52b75d0286821c96defbbbf5dd2f95",
+    "release_date": "2026-09-05",
+    "release_status": "COMPLETED",
+    "force_push": false,
     "planned_structure": [".gitignore", ".gitattributes", "README.md", "LICENSE", "docs/", "config/", "src/", "tests/", "reports/", "scripts/"],
     "exclude": [
       "imagenes satelitales pesadas", "datasets masivos", "credenciales",
@@ -236,7 +243,7 @@
     {"phase": "S-A.11", "name": "GeoData Interface", "status": "READY_FOR_REVIEW"},
     {"phase": "S-A.12", "name": "Testing", "status": "READY_FOR_REVIEW"},
     {"phase": "S-A.13", "name": "Technical Audit", "status": "APPROVED_WITH_WARNINGS"},
-    {"phase": "S-A.14", "name": "GitHub Release", "status": "NOT_STARTED"},
+    {"phase": "S-A.14", "name": "GitHub Release", "status": "COMPLETED"},
     {"phase": "S-B.0", "name": "Interpretation Architecture", "status": "NOT_STARTED"},
     {"phase": "S-B.1", "name": "Spectral Interpretation", "status": "NOT_STARTED"},
     {"phase": "S-B.2", "name": "Vegetation Indices", "status": "NOT_STARTED"},
@@ -484,6 +491,15 @@
       "alternatives_considered": ["APPROVED sin warnings", "BLOCKED por F-01/F-02", "corregir identidad en S-A.13"],
       "impact": "Cierre de S-A.13; habilitacion de S-A.14 GitHub Release.",
       "status": "DECIDED"
+    },
+    {
+      "id": "D-025",
+      "date": "2026-09-05",
+      "decision": "S-A.14 GitHub Release COMPLETED: repositorio https://github.com/hanielfierros/eo-ge-engine, rama main, commit inicial b26b7f1f4e52b75d0286821c96defbbbf5dd2f95, push sin force. HIGH de S-A.13 no corregidos. Sin datasets ni secretos.",
+      "rationale": "Publicar la infraestructura cientifica de forma segura tras APPROVED_WITH_WARNINGS.",
+      "alternatives_considered": ["esperar correccion de HIGH", "force push"],
+      "impact": "Codigo fuente y documentacion publicos; siguiente fase S-B.0 no iniciada.",
+      "status": "DECIDED"
     }
   ],
   "open_decisions": [
@@ -672,18 +688,27 @@
       "affected_components": ["reports/S_A13_TECHNICAL_AUDIT_REPORT.md", "docs/EO_GE_TECHNICAL_AUDIT_CHECKLIST.md", "memoria del proyecto"],
       "tests": "155 passed / 0 failed / 0 errors",
       "approval_status": "APPROVED_WITH_WARNINGS"
+    },
+    {
+      "version": "0.15",
+      "date": "2026-09-05",
+      "change": "Fase S-A.14 (GitHub Release) completada: repositorio publico, rama main, commit inicial b26b7f1, README, .gitignore anclado para no excluir app/catalog ni app/storage.",
+      "reason": "Publicacion segura de la infraestructura EO-GE ENGINE.",
+      "affected_components": ["README.md", ".gitignore", "EARTH_OBSERVATION_PROJECT_STATE.json", "repositorio GitHub"],
+      "tests": "155 passed / 0 failed / 0 errors",
+      "approval_status": "COMPLETED"
     }
   ],
   "session_recovery": {
-    "current_phase": "S-A.13",
-    "current_task": "TECHNICAL_AUDIT",
-    "last_completed_task": "S-A.13 (Technical Audit)",
-    "next_task": "GITHUB_RELEASE",
+    "current_phase": "S-A.14",
+    "current_task": "GITHUB_RELEASE",
+    "last_completed_task": "S-A.14 (GitHub Release)",
+    "next_task": "INTERPRETATION_ARCHITECTURE",
     "blocking_issue": "NONE",
-    "files_modified": ["EARTH_OBSERVATION_PROJECT_STATE.json", "reports/S_A13_TECHNICAL_AUDIT_REPORT.md", "docs/EO_GE_TECHNICAL_AUDIT_CHECKLIST.md"],
-    "tests_last_run": "155 passed / 0 failed / 0 errors (python -m unittest discover -s tests -p test*.py)",
-    "last_known_result": "S-A.13 APPROVED_WITH_WARNINGS. 0 CRITICAL. 2 HIGH residuales aceptados (identity reprocessing; bounds/CRS). Contrato V1.0 intacto. Radar Engine intacto. Sin datasets reales. S-A.14 no iniciada.",
-    "instructions_for_next_session": "Leer EARTH_OBSERVATION_PROJECT_STATE.json y reports/S_A13_TECHNICAL_AUDIT_REPORT.md. Iniciar S-A.14 (GitHub Release). NO modificar el contrato V1.0 ni Radar Engine. NO descargar datasets."
+    "files_modified": ["README.md", ".gitignore", "EARTH_OBSERVATION_PROJECT_STATE.json"],
+    "tests_last_run": "155 passed / 0 failed / 0 errors (python -m unittest discover -s tests -p test_*.py)",
+    "last_known_result": "S-A.14 COMPLETED. Push SUCCESS a origin/main. Commit b26b7f1f4e52b75d0286821c96defbbbf5dd2f95. S-A.13 APPROVED_WITH_WARNINGS. HIGH residuales aceptados. S-B.0 no iniciada.",
+    "instructions_for_next_session": "Leer EARTH_OBSERVATION_PROJECT_STATE.json. Continuar en S-B.0 (Interpretation Architecture). NO modificar el contrato V1.0 ni Radar Engine. NO descargar datasets. HIGH F-01/F-02 siguen aceptados."
   },
   "technical_audit": {
     "phase": "S-A.13",
@@ -710,18 +735,19 @@
     "ValidationResult no se persiste en quality.status ni catalog.validation_status",
     "collection_metadata debe ser item_assets, no la Collection STAC completa",
     "Descarga real CDSE condicionada a token; S3 no implementado",
-    "Sin README/LICENSE/.git (S-A.14)",
+    "Sin LICENSE (no requerido para S-A.14)",
     "BaseValidator actual es raster-centric"
   ],
   "blockers": [],
   "current_status": {
     "project_status": "IN_PROGRESS",
-    "current_phase": "S-A.13",
-    "current_task": "TECHNICAL_AUDIT",
-    "last_completed_task": "S-A.13 (Technical Audit)",
-    "next_task": "GITHUB_RELEASE",
-    "next_phase": "S-A.14",
+    "current_phase": "S-A.14",
+    "current_task": "GITHUB_RELEASE",
+    "last_completed_task": "S-A.14 (GitHub Release)",
+    "next_task": "INTERPRETATION_ARCHITECTURE",
+    "next_phase": "S-B.0",
     "overall_status": "IN_PROGRESS",
-    "s_a13_verdict": "APPROVED_WITH_WARNINGS"
+    "s_a13_verdict": "APPROVED_WITH_WARNINGS",
+    "s_a14_verdict": "COMPLETED"
   }
 }
