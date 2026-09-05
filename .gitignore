@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Secretos y credenciales
+.env
+.env.*
+*.token
+credentials.*
+secrets.*
+*.key
+*.pem
+
+# Datos y descargas (no versionar).
+# Rutas ancladas a la raiz para no excluir app/catalog ni app/storage.
+/source_cache/
+/staging/
+/data/
+/storage/
+/catalog/
+*.tif
+*.tiff
+*.jp2
+*.zip
+*.safe
+*.SAFE
+*.nc
+*.zarr
+*.parquet
+*.geoparquet
+*.gpkg
+*.sqlite
+*.db
+
+# Runtime / logs / cache
+logs/
+cache/
+*.log
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

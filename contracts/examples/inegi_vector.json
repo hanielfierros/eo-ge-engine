@@ -1,0 +1,22 @@
+{
+  "contract": {"name": "EO_GE_NORMALIZED_DATA_CONTRACT", "version": "1.0", "schema_version": "1.0"},
+  "identity": {"id": "INEGI_MGN_2024_v1", "version": "v1"},
+  "data_class": "CARTOGRAPHY",
+  "source": {"provider": "INEGI", "mission": "Marco Geoestadistico", "platform": "vector", "instrument": "cartografia", "collection": "MGN"},
+  "product": {"product": "MGN", "product_type": "Marco Geoestadistico Nacional", "processing_level": "NA", "version": "2024"},
+  "acquisition": {"start_time": "2024-01-01T00:00:00Z"},
+  "spatial": {"crs": "EPSG:6372", "native_crs": "EPSG:6372", "epsg": 6372, "bounds": [-120.0, 14.0, -86.0, 33.0], "geometry_type": "Polygon"},
+  "processing": {"processing_type": "NATIVE", "transformations": []},
+  "data": {
+    "kind": "vector",
+    "vector": {
+      "geometry_type": "Polygon",
+      "fields": ["CVE_ENT", "CVE_MUN", "NOM_MUN", "geometry"],
+      "feature_count": 2471,
+      "attribute_schema": {"CVE_MUN": "string", "NOM_MUN": "string"}
+    },
+    "storage": {"format": "GeoParquet", "asset_id": "INEGI_MGN_2024_v1"}
+  },
+  "quality": {"status": "AVAILABLE"},
+  "provenance": {"provider": "INEGI", "source_url": "https://www.inegi.org.mx", "original_product": "MGN 2024", "license": "Libre (INEGI)", "checksum": "sha256:mno345"}
+}

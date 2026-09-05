@@ -1,0 +1,727 @@
+{
+  "metadata": {
+    "schema_version": "1.0",
+    "project_version": "0.14",
+    "memory_version": "1.13",
+    "created_at": "2026-09-05T03:40:03Z",
+    "last_updated": "2026-09-05T06:30:00Z",
+    "file_purpose": "MEMORIA OPERATIVA, ARQUITECTONICA Y DE RECUPERACION del proyecto EO-GE ENGINE. Fuente prioritaria de contexto para futuras sesiones de IA."
+  },
+  "project": {
+    "name": "EARTH OBSERVATION & GEOSPATIAL INTELLIGENCE ENGINE",
+    "short_name": "EO-GE ENGINE",
+    "definition": "Infraestructura cientifica y geoespacial para integrar, normalizar, validar, almacenar, catalogar e interpretar informacion de observacion terrestre.",
+    "not_a_definition": [
+      "NO es un 'Satellite Image Downloader'",
+      "NO es un 'Satellite Image Viewer'",
+      "NO es 'Satellite Image AI'"
+    ],
+    "objective": "Construir un motor cientifico modular capaz de integrar multiples fuentes de observacion satelital, imagenes cientificas, datos raster, vectoriales, mapas, topografia, suelo, cobertura terrestre, agricultura, hidrologia, meteorologia, reanalisis, precipitacion, humedad, temperatura, incendios, informacion ambiental, estadisticas agricolas y futuras observaciones (drones, IoT, campo).",
+    "principle": {
+      "title": "Una imagen visual NO es automaticamente un dato cientifico.",
+      "distinctions": [
+        "imagen de visualizacion",
+        "observacion cientifica",
+        "producto satelital",
+        "producto derivado",
+        "modelo",
+        "reanalisis",
+        "clasificacion",
+        "estadistica",
+        "dato vectorial",
+        "observacion terrestre",
+        "dato calculado internamente"
+      ],
+      "must_preserve": [
+        "fuente", "producto", "sensor", "plataforma", "fecha/hora",
+        "resolucion", "referencia espacial", "variable", "unidad",
+        "calidad", "incertidumbre (si existe)", "nodata", "procesamiento", "procedencia"
+      ]
+    },
+    "future_scientific_objective": {
+      "description": "Estudiar una parcela, region, municipio o territorio combinando multiples observaciones.",
+      "example_stack": [
+        "PARCELA", "Sentinel-2", "Sentinel-1", "Landsat", "MODIS/VIIRS",
+        "GOES", "SMAP", "GPM", "ERA5-Land", "SoilGrids", "INEGI", "SIAP",
+        "CONAGUA", "CONABIO", "DEM", "otras fuentes"
+      ],
+      "future_analyses": [
+        "estado de vegetacion", "disponibilidad hidrica", "estres hidrico",
+        "anomalias", "evolucion temporal", "cambios de cobertura",
+        "temperatura superficial", "humedad", "precipitacion", "productividad",
+        "productividad del agua", "condiciones del suelo", "riesgo agricola",
+        "relaciones meteorologia-agricultura", "analisis espacial", "analisis temporal"
+      ],
+      "note": "Estos analisis pertenecen a fases posteriores. NO deben implementarse durante la inicializacion."
+    }
+  },
+  "architecture": {
+    "general": {
+      "name": "EARTH OBSERVATION & GEOSPATIAL ENGINE",
+      "domains": {
+        "SATELLITE": ["NASA Earthdata", "MODIS", "VIIRS", "SMAP", "GPM", "ECOSTRESS", "Sentinel-1", "Sentinel-2", "Landsat", "GOES"],
+        "TERRAIN": ["Copernicus DEM", "INEGI MDE", "elevation", "slope", "aspect", "hydrological derivatives"],
+        "SOIL": ["SoilGrids", "INEGI soil", "future national datasets"],
+        "LAND_COVER": ["ESA WorldCover", "INEGI Uso de Suelo", "CONABIO"],
+        "AGRICULTURE": ["SIAP Frontera Agricola", "SIAP Estimacion de Superficie Agricola", "SIAP Firmas Espectrales", "SIAP Agricultura Protegida", "SIAP estadisticas agricolas", "INEGI Censo Agropecuario"],
+        "HYDROLOGY": ["CONAGUA", "SINA", "presas", "acuiferos", "cuencas", "estaciones hidrometricas"],
+        "METEOROLOGY_LAND": ["ERA5-Land", "estaciones SMN", "future observations"],
+        "ENVIRONMENT": ["CONABIO", "NASA FIRMS", "ecosystems", "protected areas"],
+        "WATER_PRODUCTIVITY": ["FAO WaPOR"],
+        "CARTOGRAPHY": ["INEGI", "OpenStreetMap", "internal geographic layers"],
+        "FUTURE": ["drones", "field sensors", "IoT", "agricultural machinery", "proprietary observations"]
+      },
+      "note": "Arquitectura CONCEPTUAL. Productos concretos, APIs, versiones, formatos y metodos de acceso se determinan durante la AUDITORIA DE FUENTES."
+    },
+    "processing_pattern": [
+      "SOURCE", "CONNECTOR", "RAW / SOURCE REPRESENTATION", "NORMALIZER",
+      "VALIDATOR", "STANDARDIZED OBSERVATION", "DATA STORE", "CATALOG",
+      "GEOSPATIAL DATA INTERFACE", "FUTURE INTERPRETATION ENGINE"
+    ],
+    "processing_rule": "No crear conectores directamente acoplados al futuro interprete. El interprete trabajara sobre datos normalizados."
+  },
+  "components": {
+    "01_SOURCE_AUDIT": {"name": "Auditoria de fuentes y productos", "status": "READY_FOR_REVIEW"},
+    "02_CONTRACT": {"name": "Contrato normalizado de datos", "status": "FROZEN"},
+    "03_CONNECTORS": {"name": "Conectores de fuentes", "status": "READY_FOR_REVIEW"},
+    "04_NORMALIZER": {"name": "Normalizacion", "status": "READY_FOR_REVIEW"},
+    "05_VALIDATOR": {"name": "Validacion cientifica y estructural", "status": "READY_FOR_REVIEW"},
+    "06_DATA_STORE": {"name": "Almacenamiento", "status": "READY_FOR_REVIEW"},
+    "07_CATALOG": {"name": "Catalogo de observaciones", "status": "READY_FOR_REVIEW"},
+    "08_GEODATA_INTERFACE": {"name": "Interfaz interna de acceso", "status": "READY_FOR_REVIEW"},
+    "09_INTERPRETATION": {"name": "Futuro motor de interpretacion", "status": "NOT_STARTED"},
+    "10_TESTS": {"name": "Pruebas automatizadas", "status": "READY_FOR_REVIEW"},
+    "11_AUDIT": {"name": "Auditorias tecnicas", "status": "APPROVED_WITH_WARNINGS"},
+    "12_DOCUMENTATION": {"name": "Documentacion", "status": "IN_PROGRESS"}
+  },
+  "sources": {
+    "priority_to_investigate": {
+      "NASA": ["NASA Earthdata", "NASA Harmony", "GIBS", "MODIS", "VIIRS", "SMAP", "GPM", "ECOSTRESS", "FIRMS"],
+      "COPERNICUS": ["Copernicus Data Space Ecosystem", "STAC", "Sentinel-1", "Sentinel-2", "Copernicus DEM"],
+      "USGS": ["Landsat", "Landsat Collection 2", "STAC", "productos Level-1", "productos Level-2"],
+      "NOAA": ["GOES", "productos de superficie terrestre"],
+      "MEXICO": ["INEGI", "SIAP", "CONAGUA", "SMN", "CONABIO"],
+      "OTHER": ["SoilGrids/ISRIC", "ERA5-Land", "FAO WaPOR", "OpenStreetMap"]
+    },
+    "audit_criteria": [
+      "nombre oficial", "organizacion responsable", "URL oficial", "API oficial",
+      "documentacion oficial", "autenticacion", "necesidad de cuenta", "costo",
+      "restricciones", "licencia", "terminos de uso", "cobertura geografica",
+      "cobertura temporal", "disponibilidad historica", "latencia", "frecuencia",
+      "resolucion espacial", "resolucion temporal", "resolucion espectral (si aplica)",
+      "variables", "unidades", "CRS", "formatos", "nodata", "quality flags",
+      "cloud mask", "uncertainty", "procesamiento", "Level del producto",
+      "productos derivados", "acceso por STAC", "acceso por WMS", "acceso por WMTS",
+      "acceso por OGC", "acceso por API", "descarga", "streaming", "subsetting",
+      "clipping", "reproyeccion", "limitaciones", "limites de uso",
+      "estabilidad del servicio", "ventajas", "desventajas",
+      "utilidad agricola", "utilidad meteorologica", "utilidad hidrologica", "utilidad ambiental"
+    ],
+    "data_source_status": {
+      "NASA_EARTHDATA": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "COPERNICUS_DATA_SPACE": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "SENTINEL_1": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "SENTINEL_2": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "LANDSAT": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "GOES": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "MODIS": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "VIIRS": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "SMAP": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "GPM": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "INEGI": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "SIAP": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "CONAGUA": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "CONABIO": {"status": "CANDIDATE", "tier": "TIER_3", "audit_status": "PARTIAL_AUDIT"},
+      "SOILGRIDS": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "ERA5_LAND": {"status": "CANDIDATE", "tier": "TIER_1", "audit_status": "PARTIAL_AUDIT"},
+      "FAO_WAPOR": {"status": "REJECTED_FOR_SINALOA", "tier": "TIER_5", "audit_status": "PARTIAL_AUDIT", "reason": "Cobertura geografica limitada a Africa y MENA; no cubre Mexico/Sinaloa"},
+      "NASA_FIRMS": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "OPENSTREETMAP": {"status": "CANDIDATE", "tier": "TIER_3", "audit_status": "PARTIAL_AUDIT", "note": "BASEMAP, no dato cientifico"},
+      "COPERNICUS_DEM": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"},
+      "ESA_WORLDCOVER": {"status": "CANDIDATE", "tier": "TIER_2", "audit_status": "PARTIAL_AUDIT"}
+    },
+    "rule": "NINGUNA fuente se considera aprobada hasta terminar su auditoria (status = APPROVED solo con evidencia)."
+  },
+  "data_contract": {
+    "name": "EO_GE_NORMALIZED_DATA_CONTRACT",
+    "version": "1.0",
+    "status": "FROZEN",
+    "implementation_status": "NOT_IMPLEMENTED",
+    "document": "docs/EO_GE_NORMALIZED_DATA_CONTRACT_V1.md",
+    "schema": "contracts/eo_ge_normalized_data.schema.json",
+    "examples_dir": "contracts/examples/",
+    "audit": "reports/S_A4_CONTRACT_VALIDATION.md",
+    "rule": "Contrato proveedor-agnostico; no acopla a SQLite/COG/Zarr/GeoParquet/PostGIS.",
+    "root_object": ["contract", "identity", "data_class", "source", "product", "acquisition", "temporal", "spatial", "processing", "data", "quality", "provenance"],
+    "quality_vocabulary": ["AVAILABLE", "PARTIAL", "INVALID"],
+    "data_classes": ["OBSERVATION", "SCIENTIFIC_PRODUCT", "DERIVED_PRODUCT", "MODEL", "REANALYSIS", "STATISTICS", "CLASSIFICATION", "CARTOGRAPHY", "BASEMAP", "FIELD_OBSERVATION"],
+    "data_kinds": ["raster", "vector", "time_series", "multidimensional"]
+  },
+  "data_types_supported": [
+    "raster", "multidimensional arrays", "vector", "points", "polygons",
+    "lines", "time series", "gridded observations", "metadata",
+    "scientific products", "derived products"
+  ],
+  "formats_to_evaluate": [
+    "NetCDF", "GeoTIFF", "Cloud Optimized GeoTIFF", "Zarr", "HDF5", "HDF-EOS",
+    "GeoJSON", "GeoPackage", "Parquet", "GeoParquet", "CSV", "JSON", "STAC",
+    "STAC Collections", "STAC Items", "STAC Assets"
+  ],
+  "separation_principle": {
+    "title": "Separar siempre los siguientes conceptos.",
+    "concepts": [
+      "OBSERVATION", "PRODUCT", "DERIVED PRODUCT", "MODEL", "REANALYSIS",
+      "STATISTICS", "CLASSIFICATION", "MAP", "BASEMAP", "FIELD OBSERVATION"
+    ],
+    "note": "Quedara explicitamente registrado en el contrato."
+  },
+  "radar_engine_relationship": {
+    "other_project": "RADAR METEOROLOGICAL INTELLIGENCE",
+    "relationship": "INDEPENDIENTES inicialmente",
+    "rules": [
+      "NO modificar el proyecto radar.",
+      "NO copiar codigo innecesariamente.",
+      "NO crear dependencia directa entre ambos motores."
+    ],
+    "future": "FUTURE FUSION ENGINE = Radar Engine + EO-GE Engine -> Meteorological/Agricultural Intelligence (fase futura)."
+  },
+  "do_not_do_now": [
+    "crear una PWA",
+    "crear frontend",
+    "crear dashboard",
+    "crear aplicacion movil",
+    "crear API publica",
+    "crear sistema de usuarios",
+    "crear machine learning",
+    "crear IA agricola",
+    "crear recomendaciones agricolas",
+    "entrenar modelos",
+    "descargar masivamente datos",
+    "almacenar datasets gigantes dentro de GitHub",
+    "mezclar el proyecto con el radar",
+    "implementar todos los conectores inmediatamente",
+    "calcular indices agricolas antes de definir la infraestructura",
+    "inventar APIs",
+    "asumir que una fuente es cientifica solo porque muestra una imagen",
+    "utilizar mapas comerciales como fuente cientifica",
+    "guardar secretos o API keys en GitHub"
+  ],
+  "github": {
+    "planned_structure": [".gitignore", ".gitattributes", "README.md", "LICENSE", "docs/", "config/", "src/", "tests/", "reports/", "scripts/"],
+    "exclude": [
+      "imagenes satelitales pesadas", "datasets masivos", "credenciales",
+      "tokens", "API keys", "datos privados", "archivos temporales", "caches", "resultados masivos"
+    ]
+  },
+  "development_philosophy": [
+    "investigar", "documentar", "implementar", "probar", "auditar",
+    "documentar resultados", "congelar cuando corresponda"
+  ],
+  "system_of_states": {
+    "states": ["NOT_STARTED", "IN_PROGRESS", "BLOCKED", "READY_FOR_REVIEW", "APPROVED", "FROZEN", "DEPRECATED"],
+    "component_fields": ["status", "owner", "start_date", "last_update", "dependencies", "decisions", "files", "tests", "audit", "notes"]
+  },
+  "roadmap": [
+    {"phase": "S-A.0", "name": "Project Initialization", "status": "COMPLETED"},
+    {"phase": "S-A.1", "name": "Source & Product Audit", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.2", "name": "Data Architecture", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.3", "name": "Normalized Data Contract", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.4", "name": "Contract Validation", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.5", "name": "Connector Architecture", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.6", "name": "First Production Connector", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.7", "name": "Normalizer", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.8", "name": "Validator", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.9", "name": "Data Store", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.10", "name": "Catalog", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.11", "name": "GeoData Interface", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.12", "name": "Testing", "status": "READY_FOR_REVIEW"},
+    {"phase": "S-A.13", "name": "Technical Audit", "status": "APPROVED_WITH_WARNINGS"},
+    {"phase": "S-A.14", "name": "GitHub Release", "status": "NOT_STARTED"},
+    {"phase": "S-B.0", "name": "Interpretation Architecture", "status": "NOT_STARTED"},
+    {"phase": "S-B.1", "name": "Spectral Interpretation", "status": "NOT_STARTED"},
+    {"phase": "S-B.2", "name": "Vegetation Indices", "status": "NOT_STARTED"},
+    {"phase": "S-B.3", "name": "Water / Moisture Indicators", "status": "NOT_STARTED"},
+    {"phase": "S-B.4", "name": "Thermal Analysis", "status": "NOT_STARTED"},
+    {"phase": "S-B.5", "name": "Temporal Analysis", "status": "NOT_STARTED"},
+    {"phase": "S-B.6", "name": "Change Detection", "status": "NOT_STARTED"},
+    {"phase": "S-B.7", "name": "Spatial Analysis", "status": "NOT_STARTED"},
+    {"phase": "S-B.8", "name": "Agricultural Interpretation", "status": "NOT_STARTED"},
+    {"phase": "S-C.0", "name": "Future Radar + EO Fusion", "status": "NOT_STARTED"},
+    {"phase": "S-D.0", "name": "Future Agricultural Intelligence", "status": "NOT_STARTED"}
+  ],
+  "project_rules": [
+    "No romper componentes FROZEN.",
+    "No modificar contratos congelados sin nueva version.",
+    "No inventar datos.",
+    "No inventar APIs.",
+    "Usar documentacion oficial cuando se auditen fuentes.",
+    "Mantener trazabilidad.",
+    "Mantener separacion entre fuente y producto derivado.",
+    "No guardar datos masivos en GitHub.",
+    "No introducir credenciales.",
+    "Ejecutar tests antes de declarar una fase terminada.",
+    "Documentar decisiones.",
+    "Mantener compatibilidad futura.",
+    "Preferir estandares geoespaciales abiertos.",
+    "Evitar vendor lock-in innecesario.",
+    "Mantener modularidad.",
+    "Mantener independencia del Radar Engine.",
+    "No implementar agricultura inteligente antes de completar la infraestructura."
+  ],
+  "decision_log": [
+    {
+      "id": "D-001",
+      "date": "2026-09-04",
+      "decision": "Definir el proyecto como infraestructura cientifica y geoespacial (EO-GE ENGINE), no como un descargador/visor de imagenes.",
+      "rationale": "El objetivo es integrar, normalizar y catalogar observaciones terrestres de multiples fuentes, no limitarse a imagenes visuales.",
+      "alternatives_considered": ["Satellite Image Downloader", "Satellite Image Viewer", "Satellite Image AI"],
+      "impact": "Nomenclatura y alcance del proyecto.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-002",
+      "date": "2026-09-04",
+      "decision": "Mantener EO-GE ENGINE independiente del Radar Meteorological Intelligence.",
+      "rationale": "Son motores separados; su fusion pertenece a una fase futura.",
+      "alternatives_considered": ["Integrar directamente ambos motores"],
+      "impact": "Arquitectura y limites de responsabilidad.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-003",
+      "date": "2026-09-04",
+      "decision": "Patron de procesamiento: SOURCE -> CONNECTOR -> NORMALIZER -> VALIDATOR -> DATA STORE -> CATALOG -> INTERFACE.",
+      "rationale": "Desacoplar adquisicion, normalizacion, persistencia e interpretacion.",
+      "alternatives_considered": ["Conectores acoplados al interprete"],
+      "impact": "Arquitectura de procesamiento.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-004",
+      "date": "2026-09-04",
+      "decision": "Ranking TIER 1 (CORE): Sentinel-2, Landsat 8/9, MODIS, VIIRS, Sentinel-1, ERA5-Land.",
+      "rationale": "Mayor valor agricola, cobertura Sinaloa, resolucion, historico y disponibilidad.",
+      "alternatives_considered": ["Incluir fuentes de menor resolucion o cobertura parcial en TIER 1"],
+      "impact": "Foco de las siguientes fases.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-005",
+      "date": "2026-09-04",
+      "decision": "Candidatos MVP: Sentinel-2 L2A, Landsat 8/9 C2 L2, MODIS, ERA5-Land, INEGI/SIAP, Sentinel-1.",
+      "rationale": "Criterios de valor cientifico/agricola, Sinaloa, estabilidad, documentacion, resolucion y costo.",
+      "alternatives_considered": ["Comenzar con todas las fuentes TIER 1 simultaneamente"],
+      "impact": "Seleccion del primer conector de produccion (S-A.6).",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-006",
+      "date": "2026-09-04",
+      "decision": "Descartar FAO WaPOR para Sinaloa (cobertura Africa/MENA).",
+      "rationale": "No cubre Mexico/Sinaloa; la ET puede obtenerse de MODIS/ECOSTRESS o calcularse.",
+      "alternatives_considered": ["Mantener WaPOR como fuente"],
+      "impact": "Fuente marcada REJECTED_FOR_SINALOA.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-007",
+      "date": "2026-09-04",
+      "decision": "Formatos canonicos: COG (raster 2D/3D), NetCDF (multidimensional con tiempo), GeoParquet (vector), Parquet (series temporales).",
+      "rationale": "Acceso parcial eficiente, estandares abiertos, compatibilidad Python, camino a cloud.",
+      "alternatives_considered": ["un unico formato", "Zarr en MVP"],
+      "impact": "Formato de almacenamiento del data store.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-008",
+      "date": "2026-09-04",
+      "decision": "Catalogo: STAC como modelo de metadatos + SQLite como implementacion.",
+      "rationale": "Interoperabilidad STAC futura sin complejidad de PostGIS en MVP.",
+      "alternatives_considered": ["PostGIS desde el inicio", "catalogo ad hoc"],
+      "impact": "Catalogo de observaciones.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-009",
+      "date": "2026-09-04",
+      "decision": "CRS de analisis por defecto EPSG:32613 (UTM 13N) para Sinaloa; conservar CRS nativo; reproyeccion bajo demanda.",
+      "rationale": "Precision de areas/distancias para Sinaloa sin limitar arquitectura a Sinaloa.",
+      "alternatives_considered": ["CRS universal fijo", "solo WGS84"],
+      "impact": "Manejo espacial del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-010",
+      "date": "2026-09-04",
+      "decision": "Identidad determinista de datos: {source}_{product/collection}_{datetime}_{tile|granule|aoi} (+version).",
+      "rationale": "Deduplicacion y trazabilidad sin UUID como identidad primaria.",
+      "alternatives_considered": ["UUID como id primario"],
+      "impact": "Identidad y deduplicacion.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-011",
+      "date": "2026-09-04",
+      "decision": "Contrato V1.0 con 12 secciones raiz (contract/identity/data_class/source/product/acquisition/temporal/spatial/processing/data/quality/provenance) y data.kind discriminado (raster/vector/time_series/multidimensional).",
+      "rationale": "Cubrir raster/vector/series temporales/multidimensional con un solo contrato proveedor-agnostico.",
+      "alternatives_considered": ["contratos separados por tipo de dato"],
+      "impact": "Especificacion del contrato.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-012",
+      "date": "2026-09-04",
+      "decision": "Calidad normalizada (AVAILABLE/PARTIAL/INVALID) con separacion dataset_quality/pixel_quality/uncertainty; 10 data_class y 4 data.kind.",
+      "rationale": "Diferenciar calidad del dataset, calidad de pixel e incertidumbre; no convertir pixeles invalidos en dataset INVALID.",
+      "alternatives_considered": ["un unico campo de calidad"],
+      "impact": "Semantica de calidad del contrato.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-013",
+      "date": "2026-09-04",
+      "decision": "Congelar el contrato EO-GE NORMALIZED DATA CONTRACT V1.0 (FROZEN) tras auditoria adversarial sin hallazgos BLOCKING ni MAJOR.",
+      "rationale": "El contrato representa los 5 casos MVP sin perdida de informacion cientifica ni ambiguedades; 24 tests de schema pasan.",
+      "alternatives_considered": ["mantener DRAFT", "redisenar el contrato"],
+      "impact": "Estabilidad del contrato para las fases de implementacion (S-A.5+).",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-014",
+      "date": "2026-09-04",
+      "decision": "Arquitectura de conectores: BaseConnector (discover/get_metadata/download/verify) + Source Representation intermedio + Product Adapter delgado + capabilities declaradas.",
+      "rationale": "Separar transporte/producto y desacoplar el conector del storage y del contrato; reutiliza patrones del Radar Engine (errores, retries, staging, checksum).",
+      "alternatives_considered": ["conectores monolíticos por fuente", "conector acoplado al contrato V1.0"],
+      "impact": "Arquitectura de adquisicion.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-015",
+      "date": "2026-09-04",
+      "decision": "Primer conector de produccion (S-A.6): Sentinel-2 L2A (Copernicus Data Space).",
+      "rationale": "Maximo valor agricola (10m/5d), ejercita discovery STAC + descarga COG + raster multibanda, acceso abierto, cobertura Sinaloa.",
+      "alternatives_considered": ["Landsat", "Sentinel-1", "ERA5-Land"],
+      "impact": "Seleccion del primer conector.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-016",
+      "date": "2026-09-04",
+      "decision": "Sentinel2L2AConnector implementado (S-A.6) con discovery STAC, seleccion, descarga HTTP(S) con retry, SHA-256 y SourceRepresentation. Descarga S3 y OData con token difieren a fases futuras.",
+      "rationale": "Demostrar la cadena real sin descarga masiva; la descarga real queda condicionada a credenciales CDSE.",
+      "alternatives_considered": ["implementar S3 con boto3", "descargar el Product completo"],
+      "impact": "Primer conector de produccion.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-017",
+      "date": "2026-09-04",
+      "decision": "Sentinel2L2ANormalizer (S-A.7): SourceRepresentation -> contrato V1.0, con identidad determinista, CRS derivado del tile MGRS, bandas desde item_assets, y fallo explicito ante datos criticos ausentes.",
+      "rationale": "Normalizar sin simplificar; conservar metadata; nunca inventar valores; validar contra el JSON Schema.",
+      "alternatives_considered": ["normalizador generico unico", "derivar dtype por tabla fija"],
+      "impact": "Capa de normalizacion del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-018",
+      "date": "2026-09-04",
+      "decision": "El conector entrega collection_metadata (item_assets) en la SourceRepresentation para que el normalizador mapee dtype/scale/offset/nodata.",
+      "rationale": "El STAC Item de CDSE no incluye data_type/scale/offset; estan en item_assets de la coleccion.",
+      "alternatives_considered": ["tabla fija de bandas Sentinel-2", "omitir dtype"],
+      "impact": "Contrato de la SourceRepresentation.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-019",
+      "date": "2026-09-04",
+      "decision": "Validator V1 (S-A.8): dos niveles (contrato JSON Schema + semantico), puro e inmutable, clasificacion AVAILABLE/PARTIAL/INVALID con codigos deterministas y reglas Sentinel-2.",
+      "rationale": "Separar validacion estructural de la cientifica; no corregir datos; errores->INVALID, warnings->PARTIAL, ausencia opcional no degrada a INVALID.",
+      "alternatives_considered": ["solo validacion JSON Schema", "validador que corrige datos"],
+      "impact": "Capa de validacion del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-020",
+      "date": "2026-09-04",
+      "decision": "Data Store local (S-A.9): filesystem + metadata JSON + SHA-256, atomicidad via staging + rename, deterministic_id como identidad primaria, path safety, INVALID rechazado y PARTIAL almacenado.",
+      "rationale": "Persistencia simple y robusta sin DB externa; backend sustituible manteniendo la interfaz DataStore.",
+      "alternatives_considered": ["PostGIS", "SQLite", "Zarr"],
+      "impact": "Capa de persistencia del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-021",
+      "date": "2026-09-04",
+      "decision": "Catalog (S-A.10): modelo STAC-compatible + SQLite (collections/items/assets), deterministic_id como id del Item, registro idempotente, transacciones con rollback y busquedas basicas.",
+      "rationale": "Indexar sin convertirse en segunda base cientifica; migrable a PostgreSQL/PostGIS/STAC API.",
+      "alternatives_considered": ["PostgreSQL desde el inicio", "STAC API completa"],
+      "impact": "Capa de catalogo/discovery.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-022",
+      "date": "2026-09-04",
+      "decision": "GeoData Interface (S-A.11): fachada read-oriented sobre Catalog + DataStore (search/get_item/get_metadata/get_asset/get_file/verify), delegando busqueda e integridad sin SQL propia.",
+      "rationale": "Exponer una interfaz unica para futuros motores sin duplicar logica ni introducir capa cientifica.",
+      "alternatives_considered": ["API web desde ahora", "metodos de escritura en la interfaz"],
+      "impact": "Frontera de acceso a datos del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-023",
+      "date": "2026-09-04",
+      "decision": "Testing integral (S-A.12): suites de integracion y adversariales offline (pipeline completo, determinismo, idempotencia, corrupcion/recuperacion, path traversal, secret scan, offline purity).",
+      "rationale": "Verificar determinismo, seguridad, reproducibilidad y resistencia a errores sin datos reales.",
+      "alternatives_considered": ["solo tests unitarios"],
+      "impact": "Cobertura y confianza del motor.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-024",
+      "date": "2026-09-05",
+      "decision": "S-A.13 Technical Audit: veredicto APPROVED_WITH_WARNINGS. No hay CRITICAL. Dos HIGH residuales aceptados (colision de identity ante reprocesamiento Sentinel-2; bounds STAC WGS84 vs CRS nativo UTM). No se rediseña identidad ni contrato. S-A.14 puede iniciarse; no se inicia en esta fase.",
+      "rationale": "Auditoria independiente de codigo, contrato, fixtures, configuracion y 155 tests. Los HIGH requieren cambio de modelo de identidad o campo bounds_crs (contrato FROZEN) o reproyeccion silenciosa (prohibida).",
+      "alternatives_considered": ["APPROVED sin warnings", "BLOCKED por F-01/F-02", "corregir identidad en S-A.13"],
+      "impact": "Cierre de S-A.13; habilitacion de S-A.14 GitHub Release.",
+      "status": "DECIDED"
+    }
+  ],
+  "open_decisions": [
+    {"id": "OD-01", "topic": "Formato de almacenamiento raster", "options": ["COG", "Zarr", "NetCDF"], "status": "DECIDED", "resolution": "COG para raster 2D/3D; NetCDF para mallas multidimensionales con tiempo; Zarr como evolucion cloud (no en MVP)"},
+    {"id": "OD-02", "topic": "Catalogo interno", "options": ["STAC propio", "catalogo propio", "PostGIS"], "status": "DECIDED", "resolution": "STAC como modelo de metadatos + SQLite como implementacion; evolucion a PostGIS/STAC-API"},
+    {"id": "OD-03", "topic": "Estrategia de descarga y cache", "status": "DECIDED", "resolution": "SOURCE CACHE (volatil) / NORMALIZED (canonico) / DERIVED (recalculable); staging + escritura atomica + SHA-256 + dedup por ID"},
+    {"id": "OD-04", "topic": "CRS objetivo / mosaicos / reproyeccion", "status": "DECIDED", "resolution": "Conservar CRS nativo; CRS de analisis EPSG:32613 (UTM 13N) para Sinaloa; reproyeccion bajo demanda; no universal"},
+    {"id": "OD-05", "topic": "Catalogo vectorial y de series temporales", "status": "DECIDED", "resolution": "GeoParquet (canonico vector) + GeoPackage (intercambio); Parquet (series temporales/tabular)"}
+  ],
+  "architecture": {
+    "phase": "S-A.2",
+    "title": "Data Architecture",
+    "status": "READY_FOR_REVIEW",
+    "report": "reports/S_A2_DATA_ARCHITECTURE.md",
+    "pattern": "SOURCE -> CONNECTOR -> SOURCE REPRESENTATION -> NORMALIZER -> VALIDATOR -> STANDARDIZED OBSERVATION -> DATA STORE -> CATALOG -> GEOSPATIAL DATA INTERFACE -> FUTURE INTERPRETATION ENGINE",
+    "canonical_formats": {
+      "raster_2d": "COG",
+      "multidimensional_grid": "NetCDF",
+      "multidimensional_grid_future": "Zarr (S-C)",
+      "vector": "GeoParquet",
+      "vector_interchange": "GeoPackage / GeoJSON",
+      "time_series_tabular": "Parquet"
+    },
+    "catalog": "STAC-metadata + SQLite; evolucion a PostGIS/STAC-API",
+    "crs_analysis_default": "EPSG:32613 (UTM 13N) para Sinaloa",
+    "data_identity": "ID determinista {source}_{product/collection}_{datetime}_{tile|granule|aoi} (+version)",
+    "storage_layout": ["data/raw (SOURCE CACHE)", "data/normalized", "data/derived", "data/catalog/catalog.sqlite", "data/staging", "data/cache"],
+    "mvp_components": ["connector base", "normalizer", "validator", "data store", "catalog", "geo data interface"]
+  },
+  "connector_architecture": {
+    "phase": "S-A.5",
+    "title": "Connector Architecture",
+    "status": "READY_FOR_REVIEW",
+    "report": "docs/EO_GE_CONNECTOR_ARCHITECTURE.md",
+    "connector_base": ["discover", "get_metadata", "download", "verify"],
+    "source_representation": ["source", "product", "source_id", "source_metadata", "acquisition", "spatial", "temporal", "resource", "checksum", "provenance"],
+    "connector_types": ["STAC/Catalog API", "HTTP/API", "File/Granule", "Scientific Data Service", "Future authenticated"],
+    "product_adapter": "separado (delgado) entre Connector y Source Representation",
+    "error_model": ["ConnectorError", "DiscoveryError", "AuthenticationError", "RateLimitError", "DownloadError", "IntegrityError", "NotFoundError", "MetadataError", "UnsupportedProductError"],
+    "error_classes": {"TRANSIENT": "retry con backoff", "PERMANENT": "no retry", "AUTH": "no retry", "NOT_FOUND": "no retry", "RATE_LIMIT": "retry respetando retry-after", "INVALID_RESOURCE": "no retry"},
+    "capabilities": ["discovery", "spatial_filter", "temporal_filter", "tile_filter", "metadata", "download", "streaming", "authentication", "resume", "checksum"],
+    "first_production_connector": "Sentinel-2 L2A (Copernicus Data Space) - S-A.6",
+    "proposed_code_structure": ["src/connectors/base", "src/connectors/stac", "src/connectors/http", "src/connectors/file", "src/connectors/scientific", "src/connectors/adapters", "src/normalizer", "src/validator", "src/storage", "src/catalog", "src/interface"]
+  },
+  "audit": {
+    "phase": "S-A.1",
+    "title": "Source & Product Audit",
+    "status": "READY_FOR_REVIEW",
+    "report": "reports/S_A1_SOURCE_PRODUCT_AUDIT.md",
+    "sources_audited": 21,
+    "tier_1": ["Sentinel-2", "Landsat 8/9", "MODIS", "VIIRS", "Sentinel-1", "ERA5-Land"],
+    "tier_2": ["SMAP", "GPM IMERG", "GOES", "SoilGrids", "Copernicus DEM", "ESA WorldCover", "NASA FIRMS", "INEGI", "SIAP", "CONAGUA/SMN"],
+    "tier_3": ["ECOSTRESS", "CONABIO", "OpenStreetMap (basemap)"],
+    "tier_4": ["drones", "IoT", "field sensors", "agricultural machinery"],
+    "tier_5": ["FAO WaPOR (Sinaloa)", "mapas comerciales como dato cientifico"],
+    "mvp_candidates": ["Sentinel-2 L2A", "Landsat 8/9 C2 L2", "MODIS", "ERA5-Land", "INEGI/SIAP", "Sentinel-1"],
+    "rejected_sources": [
+      {"source": "FAO WaPOR", "reason": "cobertura geografica limitada a Africa/MENA", "alternative": "MODIS/ECOSTRESS o calculo propio de ET"},
+      {"source": "mapas comerciales como dato cientifico", "reason": "no trazables cientificamente", "alternative": "INEGI/OSM como basemap"}
+    ],
+    "note": "Auditoria de escritorio; detalles de API/version/licencia requieren confirmacion oficial antes de S-A.5/S-A.6 (todas las fuentes AUDIT_STATUS=PARTIAL_AUDIT)."
+  },
+  "change_log": [
+    {
+      "version": "0.1",
+      "date": "2026-09-04",
+      "change": "Creacion del archivo maestro de memoria del proyecto (EARTH_OBSERVATION_PROJECT_STATE.json).",
+      "reason": "Inicializacion del proyecto EO-GE ENGINE (fase S-A.0).",
+      "affected_components": ["memoria del proyecto"],
+      "tests": "N/A",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.2",
+      "date": "2026-09-04",
+      "change": "Fase S-A.1 (Source & Product Audit) completada: auditoria de 21 fuentes, ranking TIER, candidatos MVP, fuentes descartadas y decisiones abiertas.",
+      "reason": "Auditoria preliminar de fuentes y productos.",
+      "affected_components": ["memoria del proyecto", "reports/S_A1_SOURCE_PRODUCT_AUDIT.md"],
+      "tests": "N/A",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.3",
+      "date": "2026-09-04",
+      "change": "Fase S-A.2 (Data Architecture) completada: resolucion de las 5 decisiones abiertas, formatos canonicos, catalogo STAC+SQLite, CRS, identity, storage layout y MVP.",
+      "reason": "Diseno de la arquitectura de datos.",
+      "affected_components": ["memoria del proyecto", "reports/S_A2_DATA_ARCHITECTURE.md"],
+      "tests": "N/A",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.4",
+      "date": "2026-09-04",
+      "change": "Fase S-A.3 (Normalized Data Contract) completada: contrato V1.0, JSON Schema Draft 2020-12, 5 ejemplos validos y 14 tests de schema.",
+      "reason": "Definicion del contrato canonico de datos normalizados.",
+      "affected_components": ["docs/EO_GE_NORMALIZED_DATA_CONTRACT_V1.md", "contracts/eo_ge_normalized_data.schema.json", "contracts/examples/", "tests/test_contract_schema.py", "requirements.txt", "memoria del proyecto"],
+      "tests": "14 passed / 0 failed",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.5",
+      "date": "2026-09-04",
+      "change": "Fase S-A.4 (Contract Validation & Adversarial Audit) completada: contrato congelado FROZEN, footprint/transform anadidos, 24 tests de schema.",
+      "reason": "Auditoria adversarial del contrato V1.0.",
+      "affected_components": ["docs/EO_GE_NORMALIZED_DATA_CONTRACT_V1.md", "contracts/eo_ge_normalized_data.schema.json", "tests/test_contract_schema.py", "reports/S_A4_CONTRACT_VALIDATION.md", "memoria del proyecto"],
+      "tests": "24 passed / 0 failed",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.6",
+      "date": "2026-09-04",
+      "change": "Fase S-A.5 (Connector Architecture) completada: BaseConnector, Source Representation, error model, capabilities, product adapter y primer conector recomendado (Sentinel-2 L2A).",
+      "reason": "Diseno de la arquitectura comun de conectores.",
+      "affected_components": ["docs/EO_GE_CONNECTOR_ARCHITECTURE.md", "memoria del proyecto"],
+      "tests": "N/A (solo diseno)",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.7",
+      "date": "2026-09-04",
+      "change": "Fase S-A.6 (First Production Connector) completada: Sentinel2L2AConnector, BaseConnector, SourceRepresentation, retry, SHA-256, 16 tests offline y prueba real contra CDSE (descarga bloqueada por acceso).",
+      "reason": "Primer conector de produccion real.",
+      "affected_components": ["app/connectors/base.py", "app/connectors/sentinel2.py", "tests/test_sentinel2_connector.py", "tests/fixtures/sentinel2_item.json", "config/settings.example.json", "docs/EO_GE_SENTINEL2_CONNECTOR.md", "reports/S_A6_SENTINEL2_CONNECTOR_REPORT.md", "requirements.txt", ".gitignore", "memoria del proyecto"],
+      "tests": "40 passed / 0 failed (24 contrato + 16 conector)",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.8",
+      "date": "2026-09-04",
+      "change": "Fase S-A.7 (Normalizer) completada: Sentinel2L2ANormalizer (SourceRepresentation -> contrato V1.0), identidad determinista, CRS derivado, bandas desde item_assets, validacion contra JSON Schema, 18 tests.",
+      "reason": "Primer normalizador de produccion.",
+      "affected_components": ["app/normalizers/base.py", "app/normalizers/sentinel2.py", "app/connectors/base.py", "app/connectors/sentinel2.py", "tests/test_sentinel2_normalizer.py", "tests/fixtures/sentinel2_source_representation.json", "docs/EO_GE_SENTINEL2_NORMALIZER.md", "reports/S_A7_SENTINEL2_NORMALIZER_REPORT.md", "memoria del proyecto"],
+      "tests": "58 passed / 0 failed (24 contrato + 16 conector + 18 normalizador)",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.9",
+      "date": "2026-09-04",
+      "change": "Fase S-A.8 (Validator) completada: BaseValidator + Sentinel2Validator, validacion de contrato (JSON Schema) y semantica, AVAILABLE/PARTIAL/INVALID, inmutabilidad, 21 tests.",
+      "reason": "Primer validador de produccion.",
+      "affected_components": ["app/validators/base.py", "app/validators/sentinel2.py", "tests/test_sentinel2_validator.py", "docs/EO_GE_VALIDATOR.md", "reports/S_A8_VALIDATOR_REPORT.md", "memoria del proyecto"],
+      "tests": "79 passed / 0 failed (24 contrato + 16 conector + 18 normalizador + 21 validador)",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.10",
+      "date": "2026-09-04",
+      "change": "Fase S-A.9 (Data Store) completada: LocalDataStore (filesystem + metadata JSON + SHA-256), atomicidad, staging, deterministic IDs, path safety, 17 tests.",
+      "reason": "Primera capa de persistencia del motor.",
+      "affected_components": ["app/storage/base.py", "app/storage/local.py", "tests/test_local_data_store.py", "docs/EO_GE_DATA_STORE.md", "reports/S_A9_DATA_STORE_REPORT.md", ".gitignore", "memoria del proyecto"],
+      "tests": "96 passed / 0 failed (24 contrato + 16 conector + 18 normalizador + 21 validador + 17 data store)",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.11",
+      "date": "2026-09-04",
+      "change": "Fase S-A.10 (Catalog) completada: Catalog SQLite (STAC-compatible), collections/items/assets, adapter desde producto normalizado, idempotencia, transacciones, busquedas basicas, 18 tests.",
+      "reason": "Primera capa de catalogo/discovery del motor.",
+      "affected_components": ["app/catalog/catalog.py", "app/catalog/adapter.py", "tests/test_catalog.py", "docs/EO_GE_CATALOG.md", "reports/S_A10_CATALOG_REPORT.md", ".gitignore", "memoria del proyecto"],
+      "tests": "114 passed / 0 failed",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.12",
+      "date": "2026-09-04",
+      "change": "Fase S-A.11 (GeoData Interface) completada: fachada read-oriented sobre Catalog + DataStore, search/get_item/get_metadata/get_asset/get_file/verify, 27 tests.",
+      "reason": "Interfaz unica de acceso a datos para futuros motores.",
+      "affected_components": ["app/geodata/interface.py", "tests/test_geodata_interface.py", "docs/EO_GE_GEODATA_INTERFACE.md", "reports/S_A11_GEODATA_INTERFACE_REPORT.md", "memoria del proyecto"],
+      "tests": "141 passed / 0 failed",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.13",
+      "date": "2026-09-04",
+      "change": "Fase S-A.12 (Testing) completada: suites de integracion y adversariales, determinismo, idempotencia, corrupcion/recuperacion, path traversal, secret scan y offline purity; 155 tests.",
+      "reason": "Testing integral y regresion del motor.",
+      "affected_components": ["tests/test_integration_pipeline.py", "tests/test_adversarial.py", "docs/EO_GE_TESTING.md", "reports/S_A12_TESTING_REPORT.md", "memoria del proyecto"],
+      "tests": "155 passed / 0 failed",
+      "approval_status": "READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.14",
+      "date": "2026-09-05",
+      "change": "Fase S-A.13 (Technical Audit) completada: auditoria independiente S-A.0–S-A.12, checklist, veredicto APPROVED_WITH_WARNINGS, memoria de componentes 04–11 alineada con el codigo real.",
+      "reason": "Auditoria tecnica previa al GitHub Release (S-A.14).",
+      "affected_components": ["reports/S_A13_TECHNICAL_AUDIT_REPORT.md", "docs/EO_GE_TECHNICAL_AUDIT_CHECKLIST.md", "memoria del proyecto"],
+      "tests": "155 passed / 0 failed / 0 errors",
+      "approval_status": "APPROVED_WITH_WARNINGS"
+    }
+  ],
+  "session_recovery": {
+    "current_phase": "S-A.13",
+    "current_task": "TECHNICAL_AUDIT",
+    "last_completed_task": "S-A.13 (Technical Audit)",
+    "next_task": "GITHUB_RELEASE",
+    "blocking_issue": "NONE",
+    "files_modified": ["EARTH_OBSERVATION_PROJECT_STATE.json", "reports/S_A13_TECHNICAL_AUDIT_REPORT.md", "docs/EO_GE_TECHNICAL_AUDIT_CHECKLIST.md"],
+    "tests_last_run": "155 passed / 0 failed / 0 errors (python -m unittest discover -s tests -p test*.py)",
+    "last_known_result": "S-A.13 APPROVED_WITH_WARNINGS. 0 CRITICAL. 2 HIGH residuales aceptados (identity reprocessing; bounds/CRS). Contrato V1.0 intacto. Radar Engine intacto. Sin datasets reales. S-A.14 no iniciada.",
+    "instructions_for_next_session": "Leer EARTH_OBSERVATION_PROJECT_STATE.json y reports/S_A13_TECHNICAL_AUDIT_REPORT.md. Iniciar S-A.14 (GitHub Release). NO modificar el contrato V1.0 ni Radar Engine. NO descargar datasets."
+  },
+  "technical_audit": {
+    "phase": "S-A.13",
+    "title": "Technical Audit",
+    "status": "APPROVED_WITH_WARNINGS",
+    "report": "reports/S_A13_TECHNICAL_AUDIT_REPORT.md",
+    "checklist": "docs/EO_GE_TECHNICAL_AUDIT_CHECKLIST.md",
+    "findings": {"CRITICAL": 0, "HIGH": 2, "MEDIUM": 13, "LOW": 6, "INFO": 1},
+    "high_accepted": ["F-01 identity omite baseline ESA Nxxxx", "F-02 bounds STAC WGS84 vs crs UTM nativo"],
+    "corrective_actions": "Ninguna sobre codigo de produccion. Memoria de components 04-11 alineada."
+  },
+  "last_validation": {
+    "date": "2026-09-05",
+    "command": "python -m unittest discover -s tests -p test*.py",
+    "result": "155 passed / 0 failed / 0 errors",
+    "offline": true,
+    "contract_frozen": true
+  },
+  "known_limitations": [
+    "deterministic_id no incluye processing baseline Sentinel-2 (Nxxxx); reprocesamientos pueden colisionar",
+    "spatial.bounds copiado del bbox STAC (WGS84) mientras spatial.crs es UTM nativo; no hay reproyeccion",
+    "SQLite PRAGMA foreign_keys=0",
+    "Catalog y Data Store no comparten transaccion",
+    "ValidationResult no se persiste en quality.status ni catalog.validation_status",
+    "collection_metadata debe ser item_assets, no la Collection STAC completa",
+    "Descarga real CDSE condicionada a token; S3 no implementado",
+    "Sin README/LICENSE/.git (S-A.14)",
+    "BaseValidator actual es raster-centric"
+  ],
+  "blockers": [],
+  "current_status": {
+    "project_status": "IN_PROGRESS",
+    "current_phase": "S-A.13",
+    "current_task": "TECHNICAL_AUDIT",
+    "last_completed_task": "S-A.13 (Technical Audit)",
+    "next_task": "GITHUB_RELEASE",
+    "next_phase": "S-A.14",
+    "overall_status": "IN_PROGRESS",
+    "s_a13_verdict": "APPROVED_WITH_WARNINGS"
+  }
+}

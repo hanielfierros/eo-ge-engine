@@ -1,0 +1,14 @@
+{
+  "connectors": {
+    "sentinel2_l2a": {
+      "stac_endpoint": "https://stac.dataspace.copernicus.eu/v1/",
+      "collection": "sentinel-2-l2a",
+      "timeout_seconds": 60,
+      "max_retries": 3,
+      "backoff_seconds": 2.0
+    }
+  },
+  "authentication": {
+    "note": "El token de CDSE (OpenID Connect) se lee de la variable de entorno CDSE_TOKEN. NO se almacenan credenciales en este archivo ni en Git."
+  }
+}

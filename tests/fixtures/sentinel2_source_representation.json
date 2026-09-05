@@ -1,0 +1,118 @@
+{
+  "source": "COPERNICUS_DATA_SPACE",
+  "product": "SENTINEL2_L2A",
+  "source_id": "S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+  "source_metadata": {
+    "id": "S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+    "collection": "sentinel-2-l2a",
+    "bbox": [-109.0, 25.0, -108.0, 26.0],
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[-109.0, 25.0], [-108.0, 25.0], [-108.0, 26.0], [-109.0, 26.0], [-109.0, 25.0]]]
+    },
+    "properties": {
+      "datetime": "2026-08-28T17:48:59.024000Z",
+      "start_datetime": "2026-08-28T17:48:59.024000Z",
+      "end_datetime": "2026-08-28T17:48:59.024000Z",
+      "eo:cloud_cover": 20.24,
+      "platform": "sentinel-2b",
+      "instruments": ["msi"],
+      "gsd": 10,
+      "proj:epsg": null,
+      "processing:level": "L2",
+      "product:type": "S2MSI2A",
+      "grid:code": "T12RYP"
+    },
+    "assets": {
+      "B04_10m": {
+        "href": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_B04_10m.jp2",
+        "type": "image/jp2",
+        "roles": ["data", "reflectance", "gsd:10m"],
+        "bands": [{"name": "B04", "eo:common_name": "red"}]
+      },
+      "B08_10m": {
+        "href": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_B08_10m.jp2",
+        "type": "image/jp2",
+        "roles": ["data", "reflectance", "gsd:10m"],
+        "bands": [{"name": "B08", "eo:common_name": "nir"}]
+      },
+      "B8A_20m": {
+        "href": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_B8A_20m.jp2",
+        "type": "image/jp2",
+        "roles": ["data", "reflectance", "gsd:20m"],
+        "bands": [{"name": "B8A", "eo:common_name": "nir08"}]
+      },
+      "SCL_20m": {
+        "href": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_SCL_20m.jp2",
+        "type": "image/jp2",
+        "roles": ["data", "gsd:20m"],
+        "bands": [{"name": "SCL", "eo:common_name": null}]
+      }
+    }
+  },
+  "acquisition": {
+    "observation_time": "2026-08-28T17:48:59.024000Z",
+    "start_time": "2026-08-28T17:48:59.024000Z",
+    "end_time": "2026-08-28T17:48:59.024000Z",
+    "platform": "sentinel-2b",
+    "instrument": "msi",
+    "processing_level": "L2"
+  },
+  "spatial": {
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[-109.0, 25.0], [-108.0, 25.0], [-108.0, 26.0], [-109.0, 26.0], [-109.0, 25.0]]]
+    },
+    "bbox": [-109.0, 25.0, -108.0, 26.0],
+    "epsg": null,
+    "gsd": 10,
+    "tile": "T12RYP"
+  },
+  "temporal": {
+    "observation_time": "2026-08-28T17:48:59.024000Z",
+    "start_time": "2026-08-28T17:48:59.024000Z",
+    "end_time": "2026-08-28T17:48:59.024000Z"
+  },
+  "resource": {
+    "asset_name": "B04_10m",
+    "local_path": "source_cache/B04_10m.jp2",
+    "size_bytes": 123456,
+    "source_url": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_B04_10m.jp2",
+    "media_type": "image/jp2"
+  },
+  "checksum": "sha256:abc123",
+  "provenance": {
+    "provider": "ESA / Copernicus",
+    "collection": "sentinel-2-l2a",
+    "source_id": "S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+    "retrieval_time": "2026-09-05T04:50:00Z",
+    "license": "CC-BY-4.0 (Sentinel)",
+    "source_url": "s3://eodata/Sentinel-2/MSI/L2A/.../T12RYP_20260828T174859_B04_10m.jp2"
+  },
+  "collection_metadata": {
+    "B04_10m": {
+      "data_type": "uint16",
+      "raster:scale": 0.0001,
+      "raster:offset": -0.1,
+      "nodata": 0,
+      "proj:shape": [10980, 10980],
+      "bands": [{"name": "B04", "eo:common_name": "red"}]
+    },
+    "B08_10m": {
+      "data_type": "uint16",
+      "raster:scale": 0.0001,
+      "raster:offset": -0.1,
+      "nodata": 0,
+      "proj:shape": [10980, 10980],
+      "bands": [{"name": "B08", "eo:common_name": "nir"}]
+    },
+    "B8A_20m": {
+      "data_type": "uint16",
+      "raster:scale": 0.0001,
+      "raster:offset": -0.1,
+      "nodata": 0,
+      "proj:shape": [5490, 5490],
+      "bands": [{"name": "B8A", "eo:common_name": "nir08"}]
+    }
+  }
+}

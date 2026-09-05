@@ -1,0 +1,25 @@
+{
+  "contract": {"name": "EO_GE_NORMALIZED_DATA_CONTRACT", "version": "1.0", "schema_version": "1.0"},
+  "identity": {"id": "LANDSAT_LC09_C2L2_20260904_030045_v1", "version": "v1"},
+  "data_class": "SCIENTIFIC_PRODUCT",
+  "source": {"provider": "USGS", "mission": "Landsat 9", "platform": "Landsat 9", "instrument": "OLI/TIRS", "collection": "Collection 2"},
+  "product": {"product": "LC09_L2SP", "product_type": "Surface Reflectance", "processing_level": "L2", "version": "2"},
+  "acquisition": {"start_time": "2026-09-04T17:10:02Z", "end_time": "2026-09-04T17:10:05Z", "observation_time": "2026-09-04T17:10:02Z"},
+  "temporal": {"temporal_resolution": "P16D"},
+  "spatial": {"crs": "EPSG:32613", "native_crs": "EPSG:32613", "epsg": 32613, "bounds": [400000.0, 2700000.0, 500000.0, 2800000.0], "geometry_type": "Polygon", "resolution": {"x": 30.0, "y": 30.0, "unit": "m"}, "width": 3000, "height": 3000, "tile": "030045"},
+  "processing": {"processing_type": "NATIVE", "transformations": []},
+  "data": {
+    "kind": "raster",
+    "raster": {
+      "bands": [
+        {"name": "SR_B4", "variable": "red", "units": "1", "dtype": "uint16", "scale": 0.0000275, "offset": -0.2, "nodata": 0},
+        {"name": "SR_B5", "variable": "nir", "units": "1", "dtype": "uint16", "scale": 0.0000275, "offset": -0.2, "nodata": 0}
+      ],
+      "dimensions": {"x": 3000, "y": 3000, "band": 2},
+      "qa_band": "QA_PIXEL"
+    },
+    "storage": {"format": "COG", "asset_id": "LANDSAT_LC09_C2L2_20260904_030045_v1"}
+  },
+  "quality": {"status": "AVAILABLE"},
+  "provenance": {"provider": "USGS", "source_url": "https://www.usgs.gov/landsat-missions", "original_product": "LC09_L2SP_030045_20260904", "license": "Public Domain", "checksum": "sha256:ghi789"}
+}

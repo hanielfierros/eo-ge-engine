@@ -1,0 +1,25 @@
+{
+  "contract": {"name": "EO_GE_NORMALIZED_DATA_CONTRACT", "version": "1.0", "schema_version": "1.0"},
+  "identity": {"id": "SENTINEL2_S2MSI2A_20260904T171002_T13RFL_v1", "version": "v1"},
+  "data_class": "SCIENTIFIC_PRODUCT",
+  "source": {"provider": "ESA", "mission": "Sentinel-2", "platform": "Sentinel-2A", "instrument": "MSI", "collection": "S2MSI2A"},
+  "product": {"product": "S2MSI2A", "product_type": "Surface Reflectance", "processing_level": "L2A", "version": "1"},
+  "acquisition": {"start_time": "2026-09-04T17:10:02Z", "end_time": "2026-09-04T17:10:05Z", "observation_time": "2026-09-04T17:10:02Z"},
+  "temporal": {"temporal_resolution": "P5D"},
+  "spatial": {"crs": "EPSG:32613", "native_crs": "EPSG:32613", "epsg": 32613, "bounds": [400000.0, 2700000.0, 500000.0, 2800000.0], "geometry_type": "Polygon", "resolution": {"x": 10.0, "y": 10.0, "unit": "m"}, "width": 10980, "height": 10980, "tile": "T13RFL"},
+  "processing": {"processing_type": "NATIVE", "transformations": []},
+  "data": {
+    "kind": "raster",
+    "raster": {
+      "bands": [
+        {"name": "B04", "variable": "red", "units": "1", "dtype": "uint16", "scale": 0.0001, "offset": 0.0, "nodata": 0},
+        {"name": "B08", "variable": "nir", "units": "1", "dtype": "uint16", "scale": 0.0001, "offset": 0.0, "nodata": 0}
+      ],
+      "dimensions": {"x": 10980, "y": 10980, "band": 2},
+      "cloud_mask": "SCL"
+    },
+    "storage": {"format": "COG", "asset_id": "SENTINEL2_S2MSI2A_20260904T171002_T13RFL_v1"}
+  },
+  "quality": {"status": "AVAILABLE"},
+  "provenance": {"provider": "ESA", "source_url": "https://dataspace.copernicus.eu", "original_product": "S2A_MSIL2A_20260904T171002", "license": "CC-BY-4.0", "checksum": "sha256:abc123"}
+}

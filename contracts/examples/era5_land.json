@@ -1,0 +1,28 @@
+{
+  "contract": {"name": "EO_GE_NORMALIZED_DATA_CONTRACT", "version": "1.0", "schema_version": "1.0"},
+  "identity": {"id": "ERA5LAND_T2M_2026090400_v1", "version": "v1"},
+  "data_class": "REANALYSIS",
+  "source": {"provider": "ECMWF", "mission": "ERA5-Land", "platform": "reanalysis", "instrument": "model", "collection": "ERA5-Land"},
+  "product": {"product": "ERA5-Land", "product_type": "Reanalysis", "processing_level": "L4", "version": "1"},
+  "acquisition": {"start_time": "2026-09-04T00:00:00Z", "observation_time": "2026-09-04T00:00:00Z"},
+  "temporal": {"temporal_resolution": "PT1H", "time_coverage_start": "2026-09-04T00:00:00Z", "time_coverage_end": "2026-09-04T23:00:00Z"},
+  "spatial": {"crs": "EPSG:4326", "native_crs": "EPSG:4326", "epsg": 4326, "bounds": [-109.0, 24.0, -107.0, 26.0], "geometry_type": "Polygon", "resolution": {"x": 0.1, "y": 0.1, "unit": "degrees"}},
+  "processing": {"processing_type": "NATIVE", "transformations": []},
+  "data": {
+    "kind": "multidimensional",
+    "multidimensional": {
+      "variables": [
+        {"name": "t2m", "variable": "air_temperature_2m", "units": "K", "dtype": "float32", "nodata": null}
+      ],
+      "dimensions": [
+        {"name": "time", "size": 24, "units": "hours"},
+        {"name": "y", "size": 20},
+        {"name": "x", "size": 20}
+      ],
+      "coordinates": {"time": "2026-09-04T00:00:00Z..2026-09-04T23:00:00Z"}
+    },
+    "storage": {"format": "netCDF", "asset_id": "ERA5LAND_T2M_2026090400_v1"}
+  },
+  "quality": {"status": "AVAILABLE"},
+  "provenance": {"provider": "ECMWF", "source_url": "https://cds.climate.copernicus.eu", "original_product": "ERA5-Land hourly", "license": "Copernicus (free)", "checksum": "sha256:jkl012"}
+}

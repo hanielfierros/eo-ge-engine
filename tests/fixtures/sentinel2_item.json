@@ -1,0 +1,45 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "id": "S2A_MSIL2A_20260901T174731_N0512_R098_T12RYP_20260902T051416",
+  "collection": "sentinel-2-l2a",
+  "bbox": [-109.0, 25.0, -108.0, 26.0],
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-109.0, 25.0], [-108.0, 25.0], [-108.0, 26.0], [-109.0, 26.0], [-109.0, 25.0]]]
+  },
+  "properties": {
+    "datetime": "2026-09-01T17:47:31.024000Z",
+    "eo:cloud_cover": 5.2,
+    "platform": "sentinel-2a",
+    "instruments": ["msi"],
+    "gsd": 10,
+    "proj:epsg": 32613,
+    "processing:level": "L2A",
+    "grid:code": "T12RYP",
+    "license": "proprietary"
+  },
+  "assets": {
+    "B04_10m": {
+      "href": "https://download.dataspace.copernicus.eu/odata/v1/Products(uuid)/$value",
+      "type": "image/jp2",
+      "roles": ["data", "reflectance", "gsd:10m"]
+    },
+    "B08_10m": {
+      "href": "https://download.dataspace.copernicus.eu/odata/v1/Products(uuid)/$value",
+      "type": "image/jp2",
+      "roles": ["data", "reflectance", "gsd:10m"]
+    },
+    "product_metadata": {
+      "href": "https://download.dataspace.copernicus.eu/odata/v1/Products(uuid)/Nodes(file)/$value",
+      "type": "application/xml",
+      "roles": ["metadata"]
+    },
+    "Product": {
+      "href": "https://download.dataspace.copernicus.eu/odata/v1/Products(uuid)/$value",
+      "type": "application/zip",
+      "roles": ["data", "metadata", "archive"]
+    }
+  },
+  "links": []
+}

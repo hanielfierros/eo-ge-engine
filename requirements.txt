@@ -1,0 +1,4 @@
+# Dependencias del proyecto EO-GE ENGINE.
+# Solo se listan dependencias realmente usadas.
+jsonschema>=4.0
+requests>=2.28.0

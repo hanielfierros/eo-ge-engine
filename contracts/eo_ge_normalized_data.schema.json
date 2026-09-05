@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/eo-ge/normalized-data-contract-v1.schema.json",
+  "title": "EO-GE Normalized Data Contract V1",
+  "description": "Contrato canonico de datos normalizados del EO-GE ENGINE (EARTH OBSERVATION & GEOSPATIAL INTELLIGENCE ENGINE). Proveedor-agnostico e independiente de la implementacion de almacenamiento.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "identity",
+    "data_class",
+    "source",
+    "product",
+    "acquisition",
+    "spatial",
+    "data",
+    "quality",
+    "provenance"
+  ],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "const": "EO_GE_NORMALIZED_DATA_CONTRACT"},
+        "version": {"type": "string", "const": "1.0"},
+        "schema_version": {"type": "string"}
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "string"}
+      }
+    },
+    "data_class": {
+      "type": "string",
+      "enum": [
+        "OBSERVATION",
+        "SCIENTIFIC_PRODUCT",
+        "DERIVED_PRODUCT",
+        "MODEL",
+        "REANALYSIS",
+        "STATISTICS",
+        "CLASSIFICATION",
+        "CARTOGRAPHY",
+        "BASEMAP",
+        "FIELD_OBSERVATION"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider"],
+      "properties": {
+        "provider": {"type": "string"},
+        "mission": {"type": "string"},
+        "platform": {"type": "string"},
+        "instrument": {"type": "string"},
+        "collection": {"type": "string"}
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "processing_level"],
+      "properties": {
+        "product": {"type": "string"},
+        "product_type": {"type": "string"},
+        "processing_level": {"type": "string"},
+        "version": {"type": "string"}
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_time"],
+      "properties": {
+        "start_time": {"type": "string", "format": "date-time"},
+        "end_time": {"type": "string", "format": "date-time"},
+        "observation_time": {"type": "string", "format": "date-time"}
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temporal_resolution": {"type": "string"},
+        "duration_seconds": {"type": ["number", "null"]},
+        "time_coverage_start": {"type": "string", "format": "date-time"},
+        "time_coverage_end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "spatial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["crs", "bounds"],
+      "properties": {
+        "crs": {"type": "string"},
+        "native_crs": {"type": "string"},
+        "epsg": {"type": "integer"},
+        "bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 6,
+          "items": {"type": "number"}
+        },
+        "geometry_type": {"type": "string"},
+        "footprint": {"type": "object", "description": "Geometria GeoJSON del tile/granule (Polygon/MultiPolygon). Opcional; derivable de bounds."},
+        "transform": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {"type": "number"},
+          "description": "Geotransform afin (6 coeficientes) del raster. Opcional; derivable de bounds+resolution+width/height."
+        },
+        "resolution": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "unit": {"type": "string"}
+          }
+        },
+        "width": {"type": "integer"},
+        "height": {"type": "integer"},
+        "tile": {"type": "string"}
+      }
+    },
+    "processing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "processing_type": {
+          "type": "string",
+          "enum": ["NATIVE", "NORMALIZED", "DERIVED", "REPROJECTED", "RESAMPLED", "COMPOSITED", "AGGREGATED"]
+        },
+        "transformations": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {"type": "string", "enum": ["raster", "vector", "time_series", "multidimensional"]},
+        "raster": {"$ref": "#/$defs/raster"},
+        "vector": {"$ref": "#/$defs/vector"},
+        "time_series": {"$ref": "#/$defs/time_series"},
+        "multidimensional": {"$ref": "#/$defs/multidimensional"},
+        "storage": {"$ref": "#/$defs/storage"}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "raster"}}, "required": ["kind"]}, "then": {"required": ["raster"]}},
+        {"if": {"properties": {"kind": {"const": "vector"}}, "required": ["kind"]}, "then": {"required": ["vector"]}},
+        {"if": {"properties": {"kind": {"const": "time_series"}}, "required": ["kind"]}, "then": {"required": ["time_series"]}},
+        {"if": {"properties": {"kind": {"const": "multidimensional"}}, "required": ["kind"]}, "then": {"required": ["multidimensional"]}}
+      ]
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["AVAILABLE", "PARTIAL", "INVALID"]},
+        "dataset_quality": {"type": "object"},
+        "pixel_quality": {"type": "object"},
+        "uncertainty": {"$ref": "#/$defs/uncertainty"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider"],
+      "properties": {
+        "source_url": {"type": "string"},
+        "provider": {"type": "string"},
+        "original_product": {"type": "string"},
+        "download_time": {"type": "string", "format": "date-time"},
+        "processing_time": {"type": "string", "format": "date-time"},
+        "processing_software": {"type": "string"},
+        "processing_version": {"type": "string"},
+        "transformations": {"type": "array", "items": {"type": "string"}},
+        "checksum": {"type": "string"},
+        "license": {"type": "string"},
+        "citation": {"type": "string"},
+        "parent_dataset": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "dtype": {"type": "string", "enum": ["uint8", "uint16", "int16", "int32", "uint32", "float32", "float64"]},
+    "band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype"],
+      "properties": {
+        "name": {"type": "string"},
+        "variable": {"type": "string"},
+        "units": {"type": "string"},
+        "dtype": {"$ref": "#/$defs/dtype"},
+        "scale": {"type": ["number", "null"]},
+        "offset": {"type": ["number", "null"]},
+        "nodata": {"type": ["number", "string", "null"]}
+      }
+    },
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "size"],
+      "properties": {
+        "name": {"type": "string"},
+        "size": {"type": "integer"},
+        "units": {"type": "string"},
+        "coordinate_reference": {"type": "string"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "format": {"type": "string"},
+        "asset_id": {"type": "string"},
+        "checksum": {"type": "string"}
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "value": {"type": ["number", "null"]},
+        "unit": {"type": "string"},
+        "type": {"type": "string"},
+        "confidence": {"type": ["number", "null"]}
+      }
+    },
+    "raster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bands"],
+      "properties": {
+        "bands": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/band"}},
+        "dimensions": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "integer"},
+            "y": {"type": "integer"},
+            "band": {"type": "integer"}
+          }
+        },
+        "nodata": {"type": ["number", "string", "null"]},
+        "qa_band": {"type": "string"},
+        "cloud_mask": {"type": "string"}
+      }
+    },
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["geometry_type"],
+      "properties": {
+        "geometry_type": {"type": "string"},
+        "fields": {"type": "array", "items": {"type": "string"}},
+        "feature_count": {"type": "integer"},
+        "attribute_schema": {"type": "object"}
+      }
+    },
+    "time_series": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variable"],
+      "properties": {
+        "variable": {"type": "string"},
+        "units": {"type": "string"},
+        "location": {"type": "string"},
+        "temporal_points": {"type": "integer"},
+        "quality": {"type": "object"}
+      }
+    },
+    "multidimensional": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variables", "dimensions"],
+      "properties": {
+        "variables": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/band"}},
+        "dimensions": {"type": "array", "items": {"$ref": "#/$defs/dimension"}},
+        "coordinates": {"type": "object"}
+      }
+    }
+  }
+}
