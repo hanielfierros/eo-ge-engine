@@ -298,5 +298,58 @@ class TestDeriveIntegration(unittest.TestCase):
             self.assertNotIn(secret, blob)
 
 
+class TestDeriveResolutionAware(unittest.TestCase):
+    """S-A.17: reflectancia en resolucion nativa 20 m (B11) y nombre de archivo explicito."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.store = LocalDataStore(self.root)
+        self.catalog = Catalog(self.root / "catalog.sqlite")
+        self.meta = _source_metadata()
+        self.source_id = self.meta["identity"]["id"]
+        self.store.put_metadata(self.source_id, self.meta)
+
+        dn = _synthetic_dn(1024, 1024)
+        crs = rasterio.crs.CRS.from_epsg(32612)
+        transform = rasterio.transform.from_origin(699960.0, 2900040.0, 20, 20)
+        self.src_file = self.root / "src20.tif"
+        with rasterio.open(self.src_file, "w", driver="GTiff", height=1024, width=1024, count=1,
+                           dtype="uint16", crs=crs, transform=transform) as dst:
+            dst.write(dn, 1)
+        fm = FileMetadata(filename="B11_20m.tif", relative_path="B11_20m.tif", media_type="image/tiff", role="data", format="TIFF")
+        self.store.put_file(self.source_id, fm, self.src_file)
+
+    def tearDown(self):
+        self.catalog.close()
+        self._tmp.cleanup()
+
+    def test_derive_20m_reflectance(self):
+        derived_id = "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B11_REFL_v1"
+        result = derive_band_reflectance(
+            self.store, self.catalog, self.source_id, "B11_20m.tif", derived_id, "B11", "swir16",
+            rel_name="B11_20m.tif", resolution=(20.0, 20.0),
+        )
+        self.assertEqual(result.relative_path, "B11_20m.tif")
+        self.assertTrue(self.store.exists_derived(derived_id))
+        self.assertTrue(self.catalog.exists(derived_id))
+        self.assertTrue(self.store.verify_derived(derived_id))
+        meta = self.store.get_derived_metadata(derived_id)
+        self.assertEqual(meta["spatial"]["resolution"]["x"], 20.0)
+        self.assertEqual(meta["spatial"]["resolution"]["y"], 20.0)
+        with rasterio.open(result.cog_path) as ds:
+            self.assertEqual(ds.width, 1024)
+            self.assertEqual(ds.height, 1024)
+            self.assertAlmostEqual(ds.res[0], 20.0, places=6)
+            self.assertEqual(ds.crs.to_epsg(), 32612)
+        checks = validate_derived_product(
+            self.store, self.catalog, self.source_id, "B11_20m.tif",
+            derived_id, result.relative_path, expected_crs_epsg=32612,
+            expected_width=1024, expected_height=1024, expected_res=(20.0, 20.0),
+        )
+        failures = [c for c in checks if c["result"] != "PASS"]
+        self.assertEqual(failures, [], f"checks con FAIL: {failures}")
+
+
 if __name__ == "__main__":
     unittest.main()

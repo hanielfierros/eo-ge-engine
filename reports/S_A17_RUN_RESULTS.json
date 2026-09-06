@@ -1,0 +1,117 @@
+{
+  "derived_id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_SAVI_v1",
+  "relative_path": "SAVI_10m.tif",
+  "cog_path": "/mnt/c/Users/hanie/OneDrive/Documentos Varios Mx An/0 Eben Ezer Aviation/IPN/Proyectos Agronomía/Plataforma Meteorologica Agricultura/Base de Datos/Imagenes Satelitales/storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_SAVI_v1/files/SAVI_10m.tif",
+  "sha256": "ce3dc2a054abffe7f7a7ad663b00b70a85b85d9d55d81f42fbfd0b9373fdb611",
+  "checks": [
+    {
+      "check": "file_exists",
+      "result": "PASS",
+      "detail": "/mnt/c/Users/hanie/OneDrive/Documentos Varios Mx An/0 Eben Ezer Aviation/IPN/Proyectos Agronomía/Plataforma Meteorologica Agricultura/Base de Datos/Imagenes Satelitales/storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_SAVI_v1/files/SAVI_10m.tif"
+    },
+    {
+      "check": "opens_with_rasterio",
+      "result": "PASS",
+      "detail": "driver=GTiff"
+    },
+    {
+      "check": "crs_correct",
+      "result": "PASS",
+      "detail": "EPSG:32612"
+    },
+    {
+      "check": "transform_correct",
+      "result": "PASS",
+      "detail": "| 10.00, 0.00, 699960.00|\n| 0.00,-10.00, 2900040.00|\n| 0.00, 0.00, 1.00|"
+    },
+    {
+      "check": "dimensions_correct",
+      "result": "PASS",
+      "detail": "10980x10980"
+    },
+    {
+      "check": "aligned_with_inputs",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dtype_float32",
+      "result": "PASS",
+      "detail": "float32"
+    },
+    {
+      "check": "nodata_is_nan",
+      "result": "PASS",
+      "detail": "nan"
+    },
+    {
+      "check": "mask_coherent",
+      "result": "PASS",
+      "detail": "expected_invalid=75537840 cog_nan=75537840"
+    },
+    {
+      "check": "no_inf",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dn0_reflectance_invalid",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "numerically_coherent",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "is_cog_driver",
+      "result": "PASS",
+      "detail": "driver=GTiff"
+    },
+    {
+      "check": "cog_tiled",
+      "result": "PASS",
+      "detail": "(512, 512)"
+    },
+    {
+      "check": "cog_compression",
+      "result": "PASS",
+      "detail": "Compression.deflate"
+    },
+    {
+      "check": "cog_overviews",
+      "result": "PASS",
+      "detail": "[2, 4, 8, 16, 32]"
+    },
+    {
+      "check": "sha256_registered",
+      "result": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "catalog_registered",
+      "result": "PASS",
+      "detail": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_SAVI_v1"
+    }
+  ],
+  "stats": {
+    "total_pixels": 120560400,
+    "valid_pixels": 45022560,
+    "invalid_pixels": 75537840,
+    "pct_valid": 37.344401644321024,
+    "pct_invalid": 62.655598355678976,
+    "nan_count": 75537840,
+    "inf_count": 0,
+    "min": -0.28098350763320923,
+    "max": 0.7674635648727417,
+    "mean": 0.15895943343639374,
+    "p01": -0.06592319905757904,
+    "p50": 0.07331772148609161,
+    "p99": 0.5957687497138977,
+    "out_of_expected_range": null,
+    "count_below_minus1": 0,
+    "count_above_1": 0
+  },
+  "all_pass": true
+}

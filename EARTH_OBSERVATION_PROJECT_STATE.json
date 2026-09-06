@@ -2,9 +2,9 @@
   "metadata": {
     "schema_version": "1.0",
     "project_version": "0.16",
-    "memory_version": "1.18",
+    "memory_version": "1.22",
     "created_at": "2026-09-05T03:40:03Z",
-    "last_updated": "2026-09-05T19:55:00Z",
+    "last_updated": "2026-09-06T04:16:25Z",
     "file_purpose": "MEMORIA OPERATIVA, ARQUITECTONICA Y DE RECUPERACION del proyecto EO-GE ENGINE. Fuente prioritaria de contexto para futuras sesiones de IA."
   },
   "current_phase": {
@@ -1153,6 +1153,45 @@
       ],
       "impact": "Item con B04_10m.jp2 y B08_10m.jp2. B04 intacto (44822636 / bf94442d...). B08 47052534 bytes SHA-256 82395f6a... OFFICIAL_SHA3_256_MATCH. S-A.16 no iniciada.",
       "status": "DECIDED"
+    },
+    {
+      "id": "D-030",
+      "date": "2026-09-06",
+      "decision": "S-A.17 (materializacion): adquirir y materializar B03_10m (GREEN, 10 m) y B11_20m (SWIR, 20 m) del producto S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402 reutilizando Sentinel2L2AConnector + ingest_sentinel2_asset incremental. NO resamplear, NO reproyectar, NO convertir a reflectancia, NO COG, NO generar NDWI/NDMI en esta fase.",
+      "rationale": "NDWI requiere B03 y NDMI requiere B11; ambos estaban sin materializar (S-A.17 previo los dejo PENDING/BLOCKED por ausencia de CDSE_TOKEN). Con CDSE_TOKEN OIDC presente se materializan de forma controlada, con checksum oficial (sha3-256 CDSE) y SHA-256 local, conservando resolucion nativa (B03=10 m, B11=20 m).",
+      "alternatives_considered": [
+        "sustituir B03/B11 por otras bandas (invalido)",
+        "resamplear B11 a 10 m (prohibido en esta fase)",
+        "generar NDWI/NDMI en esta fase (fuera de alcance)"
+      ],
+      "impact": "Item SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1 acumula B03_10m.jp2 y B11_20m.jp2 ademas de B04/B08. B04/B08/SAVI intactos. NDMI/NDWI quedan habilitados para fase posterior. S-A.17 = PARTIAL / READY_FOR_REVIEW.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-031",
+      "date": "2026-09-06",
+      "decision": "S-A.17 (indices): generar B03 reflectance COG (10 m), B11 reflectance COG (20 m nativo), NDWI (10 m, B03+B08) y NDMI (20 m, B08 reamuestrado a grid nativo B11). El NDMI se genera a resolucion NATIVA de B11 (20 m), reamuestrando B08 10m -> grid B11 20m via rasterio.warp.reproject con metodo bilinear explicito. Sin reproyeccion de CRS, sin resampling de B11, sin clipping, mascara = input invalido OR denominador 0 -> NaN.",
+      "rationale": "NDWI y NDMI deben calcularse sobre reflectancia (nunca DN). B08 es 10 m y B11 es 20 m; generar un NDMI a 10 m fingiendo B11 a 10 m seria cientificamente incorrecto. Por eso el NDMI se genera a 20 m (grid nativo B11) con reamuestreo bilinear explicito de B08, registrado en provenance.",
+      "alternatives_considered": [
+        "generar NDMI a 10 m (resamplear B11) -> rechazado (regla cientifica)",
+        "usar DN en lugar de reflectancia -> rechazado",
+        "aplicar clipping [-1,1] -> rechazado"
+      ],
+      "impact": "Cuatro productos derivados nuevos catalogados (B03_REFL, B11_REFL, NDWI, NDMI). S-A.17 queda listo para NDWI/NDMI. NO se cierra S-A.17. S-A.18 no iniciada.",
+      "status": "DECIDED"
+    },
+    {
+      "id": "D-032",
+      "date": "2026-09-06",
+      "decision": "S-A.17 Final Audit: veredicto APPROVED_WITH_WARNINGS. Auditoria independiente de los 4 productos (B03_REFL, B11_REFL, NDWI, NDMI), ciencia, NDWI (10 m, sin resampling), NDMI (20 m, reamuestreo bilinear explicito B08->B11), mascara, pixel >1, SCL, tests (231 OK x2), regresion, idempotencia y codigo. 0 CRITICAL / 0 HIGH / 2 MEDIUM / 1 LOW / 1 INFO.",
+      "rationale": "Todos los hashes coinciden, la ciencia es correcta, el resampling del NDMI es explicito y reproducible, la provenance es correcta, el catalogo y el COG son correctos, los tests pasan y la regresion es limpia. Los warnings (SCL no materializado, 1 pixel >1 explicado matematicamente, pytest ausente) son conocidos, documentados y no bloqueantes.",
+      "alternatives_considered": [
+        "APPROVED sin warnings",
+        "BLOCKED por pixel >1",
+        "BLOCKED por ausencia de SCL"
+      ],
+      "impact": "S-A.17 queda APPROVED_WITH_WARNINGS y apta para release. NO se hace commit/push/release ni se inicia S-A.18 en esta ejecucion.",
+      "status": "DECIDED"
     }
   ],
   "open_decisions": [
@@ -1561,6 +1600,58 @@
       ],
       "tests": "155 passed / 0 failed / 0 errors",
       "approval_status": "COMPLETED"
+    },
+    {
+      "version": "0.16",
+      "date": "2026-09-06",
+      "change": "Fase S-A.17 (materializacion B03/B11): adquisicion y materializacion real de B03_10m (GREEN, 10 m) y B11_20m (SWIR, 20 m) sobre el Item SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1, via Sentinel2L2AConnector + ingest_sentinel2_asset incremental. B03 43886669 bytes SHA-256 895d747e..., B11 12508068 bytes SHA-256 7cd433ef..., ambos OFFICIAL_SHA3_256_MATCH, CRS EPSG:32612, resolucion nativa conservada (B03 10 m / B11 20 m), catalogados. B04/B08/SAVI intactos. NDWI/NDMI NO calculados en esta fase.",
+      "reason": "Habilitar NDWI (B03) y NDMI (B11) como inputs materializados, sin adelantar el calculo de indices.",
+      "affected_components": [
+        "storage/normalized/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1 (B03_10m.jp2, B11_20m.jp2)",
+        "storage/source_cache/S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+        "catalog/catalog.sqlite (assets B03_10m, B11_20m)",
+        "memoria del proyecto"
+      ],
+      "tests": "N/A (descarga real CDSE; suite offline no modificada)",
+      "approval_status": "PARTIAL / READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.17",
+      "date": "2026-09-06",
+      "change": "Fase S-A.17 (indices espectrales): generacion y validacion de B03 reflectance COG (10 m), B11 reflectance COG (20 m), NDWI (10 m) y NDMI (20 m con reamuestreo bilinear explicito B08->B11). Productos catalogados, COG real, mascara DN=0/denominador=0 -> NaN, sin clipping. Suite completa 231 tests OK (skipped=1) en doble ejecucion.",
+      "reason": "Completar tecnicamente los indices NDWI y NDMI de S-A.17 sobre reflectancia.",
+      "affected_components": [
+        "app/processing/raster.py (derive_band_reflectance con resolucion/nombre parametrizables)",
+        "app/processing/indices.py (derive_resampled_index, validate_resampled_index_product, resampling bilinear)",
+        "tests/test_raster_processing.py (reflectancia 20 m)",
+        "tests/test_spectral_indices.py (NDWI y NDMI reamuestrado)",
+        "storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_{B03_REFL,B11_REFL,NDWI,NDMI}_v1",
+        "catalog/catalog.sqlite",
+        "memoria del proyecto"
+      ],
+      "tests": "231 passed / 0 failed / 0 errors / 1 skipped (doble ejecucion)",
+      "approval_status": "PARTIAL / READY_FOR_REVIEW"
+    },
+    {
+      "version": "0.18",
+      "date": "2026-09-06",
+      "change": "Fase S-A.17 COMPLETED / APPROVED_WITH_WARNINGS / RELEASED. Cierre formal y release en Git (rama main, commit 'Complete S-A.17 spectral indices and release'). Reportes: S_A17_SPECTRAL_INDICES_REPORT.md, S_A17_BAND_REQUIREMENTS.md, S_A17_FINAL_AUDIT.md, S_A17_RELEASE.md.",
+      "reason": "Cierre formal de S-A.17 tras auditoria final APPROVED_WITH_WARNINGS (recomendacion RELEASE).",
+      "affected_components": [
+        "EARTH_OBSERVATION_PROJECT_STATE.json",
+        "app/processing/raster.py",
+        "app/processing/indices.py",
+        "tests/test_raster_processing.py",
+        "tests/test_spectral_indices.py",
+        "reports/S_A17_SPECTRAL_INDICES_REPORT.md",
+        "reports/S_A17_BAND_REQUIREMENTS.md",
+        "reports/S_A17_FINAL_AUDIT.md",
+        "reports/S_A17_RELEASE.md",
+        "reports/S_A17_RUN_RESULTS.json",
+        "memoria del proyecto"
+      ],
+      "tests": "231 passed / 0 failed / 0 errors / 1 skipped",
+      "approval_status": "COMPLETED"
     }
   ],
   "github_release": {
@@ -1755,15 +1846,184 @@
   "blockers": [],
   "current_status": {
     "project_status": "IN_PROGRESS",
-    "current_phase": "S-A.14",
-    "current_task": "GITHUB_RELEASE",
-    "last_completed_task": "S-A.14 (GitHub Release)",
-    "next_task": "INTERPRETATION_ARCHITECTURE",
-    "next_phase": "S-B.0",
+    "current_phase": "S-A.17",
+    "current_task": "S_A17_RELEASE",
+    "last_completed_task": "S-A.17 (COMPLETED / APPROVED_WITH_WARNINGS / RELEASED)",
+    "next_task": "S-A.18 (NO iniciada en esta ejecucion)",
+    "next_phase": "S-A.18",
     "overall_status": "IN_PROGRESS",
     "s_a13_verdict": "APPROVED_WITH_WARNINGS",
     "s_a14_verdict": "COMPLETED",
+    "s_a17_verdict": "COMPLETED / APPROVED_WITH_WARNINGS / RELEASED",
     "github_head": "90c687db3ab5dafd967025c2d5a2f5c8857392fd",
     "github_release_commit": "b26b7f1f4e52b75d0286821c96defbbbf5dd2f95"
+  },
+  "s_a17_materialization": {
+    "phase": "S-A.17",
+    "name": "Materializacion B03/B11 (NDWI/NDMI inputs)",
+    "status": "PARTIAL / READY_FOR_REVIEW",
+    "product_id": "S2B_MSIL2A_20260828T174859_N0512_R141_T12RYP_20260828T213402",
+    "item_id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_v1",
+    "b03": {
+      "status": "MATERIALIZED",
+      "asset_id": "B03_10m",
+      "variable": "GREEN",
+      "size_bytes": 43886669,
+      "sha256": "895d747e1fc75b15b06bc4f27d274d1d4aece0c81717c10330c9c72c4bd94e57",
+      "checksum_verification": "OFFICIAL_SHA3_256_MATCH",
+      "resolution": "10 m",
+      "crs": "EPSG:32612",
+      "dimensions": [10980, 10980],
+      "catalog": "YES"
+    },
+    "b11": {
+      "status": "MATERIALIZED",
+      "asset_id": "B11_20m",
+      "variable": "SWIR",
+      "size_bytes": 12508068,
+      "sha256": "7cd433ef5b8b1dde26753e758905e9c83b0be6469b91d7edc1cd3d8a66eb6989",
+      "checksum_verification": "OFFICIAL_SHA3_256_MATCH",
+      "resolution": "20 m",
+      "crs": "EPSG:32612",
+      "dimensions": [5490, 5490],
+      "catalog": "YES"
+    },
+    "intact": {
+      "B04": "PASS",
+      "B08": "PASS",
+      "SAVI": "PASS"
+    },
+    "validations": [
+      "discovery STAC por ids -> 1 item (sentinel-2b, MGRS-12RYP/T12RYP, cloud 20.24%)",
+      "B03_10m gsd 10 m, proj:shape [10980,10980], alternate.https OIDC resuelto",
+      "B11_20m gsd 20 m, proj:shape [5490,5490], alternate.https OIDC resuelto",
+      "rasterio: B03 10980x10980 EPSG:32612 res 10.0 m; B11 5490x5490 EPSG:32612 res 20.0 m",
+      "store.verify(item) = True; catalog assets B04/B08/B03/B11",
+      "B04/B08/SAVI sha256 recalculados e identicos a los registrados"
+    ],
+    "warnings": [
+      "B11 conservado en resolucion nativa 20 m (NO resampleado, NO reproyectado, NO COG, NO reflectancia)",
+      "metadata spatial.resolution del Item sigue declarando gsd 10 m (propiedad del Item); la resolucion nativa de B11 se conserva en el asset B11_20m (20 m)"
+    ],
+    "blockers": [],
+    "not_done": [
+      "NDWI (B03+B08) NO calculado en esta fase",
+      "NDMI (B08+B11) NO calculado en esta fase",
+      "conversion a reflectancia/COG de B03/B11 NO realizada en esta fase"
+    ],
+    "next_phase_permitted": "Calcular NDWI y NDMI como productos derivados (fase posterior, NO ejecutada aqui)"
+  },
+  "s_a17_products": {
+    "phase": "S-A.17",
+    "name": "Reflectancia B03/B11 + NDWI/NDMI",
+    "status": "COMPLETED / APPROVED_WITH_WARNINGS / RELEASED",
+    "rule": "indices calculados sobre reflectancia (nunca DN); NDMI a resolucion nativa B11 (20 m); sin clipping",
+    "products": {
+      "B03_REFL": {
+        "id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B03_REFL_v1",
+        "file": "B03_10m.tif",
+        "size_bytes": 141254040,
+        "sha256": "2489e7d1dcc51da221373f0ff9e20ce50fad9878c0a07e08e33e8c4f906a4638",
+        "resolution": "10 m",
+        "crs": "EPSG:32612",
+        "dimensions": [10980, 10980],
+        "catalog": "YES"
+      },
+      "B11_REFL": {
+        "id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B11_REFL_v1",
+        "file": "B11_20m.tif",
+        "size_bytes": 37826143,
+        "sha256": "febd31aafc988838c553e4aa12e1c0435951fa346c7b22532924e0fb490a4c45",
+        "resolution": "20 m",
+        "crs": "EPSG:32612",
+        "dimensions": [5490, 5490],
+        "catalog": "YES"
+      },
+      "NDWI": {
+        "id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_NDWI_v1",
+        "file": "NDWI_10m.tif",
+        "size_bytes": 209452051,
+        "sha256": "fa02133d64382d7d57e09df8f1e43cd49c69ec9d1814043d3a78f7f9ee64922f",
+        "formula": "(B03 - B08) / (B03 + B08)",
+        "resolution": "10 m",
+        "crs": "EPSG:32612",
+        "dimensions": [10980, 10980],
+        "catalog": "YES"
+      },
+      "NDMI": {
+        "id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_NDMI_v1",
+        "file": "NDMI_20m.tif",
+        "size_bytes": 54465553,
+        "sha256": "131959bdff3d2ebb6cf67d9ff2ba67acceac1ded68e45119357d50805b5e0740",
+        "formula": "(B08 - B11) / (B08 + B11)",
+        "resolution": "20 m",
+        "crs": "EPSG:32612",
+        "dimensions": [5490, 5490],
+        "resampling": "B08 10m -> grid B11 20m, bilinear explicito (rasterio.warp.reproject)",
+        "catalog": "YES"
+      }
+    },
+    "validations": [
+      "B03_REFL: 23/23 checks PASS (geometria, COG, mascara, integridad, catalogo)",
+      "B11_REFL: 23/23 checks PASS",
+      "NDWI: 18/18 checks PASS",
+      "NDMI: 18/18 checks PASS (incluye resampling bilinear independiente)",
+      "NDWI 10 m, NDMI 20 m confirmados con rasterio (transform/dimensiones/CRS)"
+    ],
+    "intact": {
+      "B03_10m.jp2": "PASS",
+      "B11_20m.jp2": "PASS",
+      "B04_10m.jp2": "PASS",
+      "B08_10m.jp2": "PASS",
+      "B04_REFL": "PASS",
+      "B08_REFL": "PASS",
+      "SAVI": "PASS"
+    },
+    "idempotency": "re-ejecucion completa produce SHA-256 identicos (sin duplicar, sin corromper catalogo)",
+    "tests": "231 passed / 0 failed / 0 errors / 1 skipped (doble ejecucion, unittest discover)",
+    "warnings": [
+      "NDWI y NDMI presentan 1 pixel con valor > 1 (reflectancia > 1 por nube/glint); NO se aplica clipping (regla cientifica)",
+      "SCL no materializado: mascara = DN==0 (nadata/edge), sin mascara de nubes/sombra",
+      "pytest no instalado en .venv-wsl; se uso el runner canonico del proyecto (unittest discover)"
+    ],
+    "not_done": [
+      "S-A.18 (no iniciada)",
+      "BRAIN_02 / entrenamiento (no iniciados)"
+    ],
+    "final_audit": {
+      "date": "2026-09-06",
+      "verdict": "APPROVED_WITH_WARNINGS",
+      "report": "reports/S_A17_FINAL_AUDIT.md",
+      "findings": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 2,
+        "LOW": 1,
+        "INFO": 1
+      },
+      "findings_detail": [
+        "MEDIUM: SCL no materializado (mascara solo DN==0, sin nubes/sombra)",
+        "MEDIUM: 1 pixel >1 en NDWI y NDMI (reflectancias negativas L2A, matematicamente correcto, sin clipping)",
+        "LOW: derive_index_product hardcodea '_10m.tif' (correcto para indices 10 m)",
+        "INFO: pytest ausente; runner canonico = unittest discover"
+      ],
+      "recommendation": "RELEASE",
+      "tests": "231 passed / 0 failed / 0 errors / 1 skipped (doble ejecucion)"
+    },
+    "release": {
+      "status": "RELEASED",
+      "date": "2026-09-06",
+      "branch": "main",
+      "remote": "origin",
+      "remote_url": "https://github.com/hanielfierros/eo-ge-engine.git",
+      "commit_message": "Complete S-A.17 spectral indices and release",
+      "tests": "231 passed / 0 failed / 0 errors / 1 skipped",
+      "warnings_accepted": [
+        "SCL no materializado (mascara solo DN==0)",
+        "1 pixel >1 en NDWI/NDMI por reflectancia negativa L2A",
+        "LOW: nombre '_10m.tif' hardcodeado en derive_index_product",
+        "INFO: pytest ausente / unittest canonico"
+      ]
+    }
   }
 }

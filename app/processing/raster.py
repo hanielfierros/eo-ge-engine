@@ -121,6 +121,7 @@ def _build_derived_metadata(
     height: int,
     cog_sha256: str,
     processing_time: str,
+    resolution: tuple[float, float] = (10.0, 10.0),
 ) -> dict[str, Any]:
     """Construye metadata de producto derivado conforme al contrato V1.0."""
     source = source_meta.get("source", {})
@@ -154,7 +155,7 @@ def _build_derived_metadata(
             "geometry_type": spatial.get("geometry_type"),
             "footprint": spatial.get("footprint"),
             "transform": transform,
-            "resolution": {"x": 10, "y": 10, "unit": "m"},
+            "resolution": {"x": resolution[0], "y": resolution[1], "unit": "m"},
             "width": width,
             "height": height,
             "tile": spatial.get("tile"),
@@ -246,11 +247,15 @@ def derive_band_reflectance(
     derived_id: str,
     band_name: str,
     band_variable: str,
+    rel_name: str | None = None,
+    resolution: tuple[float, float] | None = None,
 ) -> DeriveResult:
     """Deriva un producto de reflectancia (COG) a partir de un JP2 fuente.
 
     Solo lectura de la fuente. Escribe el COG en storage/derived/<id>/ y registra
-    el producto en el catalogo.
+    el producto en el catalogo. El nombre de archivo y la resolucion se derivan de
+    la fuente por defecto; pueden sobrescribirse con `rel_name`/`resolution`
+    (p. ej. B11_20m nativo 20 m).
     """
     geo = GeoDataInterface(catalog, store)
     src_path = geo.get_file(source_item_id, source_rel_path)
@@ -263,13 +268,15 @@ def derive_band_reflectance(
         transform = ds.transform
         gdal_transform = list(ds.transform.to_gdal())  # [x0, px_w, rot, y0, rot, px_h]
         bounds = [float(ds.bounds.left), float(ds.bounds.bottom), float(ds.bounds.right), float(ds.bounds.top)]
+        src_res = (float(ds.res[0]), float(ds.res[1]))
         dn = ds.read(1)
 
     valid = build_valid_mask(dn)
     refl = reflectance_from_dn(dn)
     refl = apply_mask(refl, valid)
 
-    rel = f"{band_name}_10m_reflectance.tif"
+    res = resolution or src_res
+    rel = rel_name or f"{band_name}_10m_reflectance.tif"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_cog = Path(tmpdir) / rel
@@ -306,6 +313,7 @@ def derive_band_reflectance(
             height=height,
             cog_sha256=cog_sha,
             processing_time=processing_time,
+            resolution=res,
         )
 
         store.put_derived_metadata(derived_id, metadata)
