@@ -1,0 +1,250 @@
+[
+  {
+    "band": "B04",
+    "derived_id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B04_REFL_v1",
+    "cog_path": "storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B04_REFL_v1/files/B04_10m_reflectance.tif",
+    "sha256": "a0fbadcb92e804d2af2e3c8a511578ac2a232d783f80e4286a1cd2b419a542d4",
+    "checks": [
+      {
+        "check": "file_exists",
+        "result": "PASS",
+        "detail": "storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B04_REFL_v1/files/B04_10m_reflectance.tif"
+      },
+      {
+        "check": "opens_with_rasterio",
+        "result": "PASS",
+        "detail": "driver=GTiff"
+      },
+      {
+        "check": "crs_correct",
+        "result": "PASS",
+        "detail": "EPSG:32612"
+      },
+      {
+        "check": "transform_correct",
+        "result": "PASS",
+        "detail": "| 10.00, 0.00, 699960.00|\n| 0.00,-10.00, 2900040.00|\n| 0.00, 0.00, 1.00|"
+      },
+      {
+        "check": "resolution_correct",
+        "result": "PASS",
+        "detail": "(10.0, 10.0)"
+      },
+      {
+        "check": "dimensions_correct",
+        "result": "PASS",
+        "detail": "10980x10980"
+      },
+      {
+        "check": "aligned_with_source",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "dtype_float32",
+        "result": "PASS",
+        "detail": "float32"
+      },
+      {
+        "check": "nodata_is_nan",
+        "result": "PASS",
+        "detail": "nan"
+      },
+      {
+        "check": "mask_coherent",
+        "result": "PASS",
+        "detail": "source_invalid=75537840 cog_nan=75537840"
+      },
+      {
+        "check": "dn0_not_valid_reflectance",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "no_silent_transformation",
+        "result": "PASS",
+        "detail": "reflectancia valida sin NaN"
+      },
+      {
+        "check": "no_silent_reprojection",
+        "result": "PASS",
+        "detail": "EPSG:32612"
+      },
+      {
+        "check": "no_unexpected_coverage_loss",
+        "result": "PASS",
+        "detail": "valid=45022560"
+      },
+      {
+        "check": "reflectance_numerically_coherent",
+        "result": "PASS",
+        "detail": "(0,0) dn=1670 expected=0.067 got=0.06699999421834946; (0,1) dn=1663 expected=0.0663 got=0.06629999727010727; (1,0) dn=1670 expected=0.067 got=0.06699999421834946; (10979,10979) dn=0 expected=nan got=nan; (5490,5490) dn=0 expected=nan got=nan; DN=1000: no presente en el raster; DN=10000: no presente en el raster; DN=11000@(420,3937) dn=11000 expected=1.0 got=1.0; DN>11000 max=17455@(2310,1574) expected=1.6455 got=1.6454999446868896"
+      },
+      {
+        "check": "is_cog_driver",
+        "result": "PASS",
+        "detail": "driver=GTiff"
+      },
+      {
+        "check": "cog_tiled",
+        "result": "PASS",
+        "detail": "(512, 512)"
+      },
+      {
+        "check": "cog_compression",
+        "result": "PASS",
+        "detail": "Compression.deflate"
+      },
+      {
+        "check": "cog_overviews",
+        "result": "PASS",
+        "detail": "[2, 4, 8, 16, 32]"
+      },
+      {
+        "check": "cog_georeferenced",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "sha256_registered",
+        "result": "PASS",
+        "detail": "a0fbadcb92e804d2af2e3c8a511578ac2a232d783f80e4286a1cd2b419a542d4"
+      },
+      {
+        "check": "verify_derived",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "catalog_registered",
+        "result": "PASS",
+        "detail": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B04_REFL_v1"
+      }
+    ],
+    "all_pass": true
+  },
+  {
+    "band": "B08",
+    "derived_id": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B08_REFL_v1",
+    "cog_path": "storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B08_REFL_v1/files/B08_10m_reflectance.tif",
+    "sha256": "1528c2b3d87ff7c0c97ae6cbe1e11661072d9d1b6d2010a9938bae46d39522b8",
+    "checks": [
+      {
+        "check": "file_exists",
+        "result": "PASS",
+        "detail": "storage/derived/SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B08_REFL_v1/files/B08_10m_reflectance.tif"
+      },
+      {
+        "check": "opens_with_rasterio",
+        "result": "PASS",
+        "detail": "driver=GTiff"
+      },
+      {
+        "check": "crs_correct",
+        "result": "PASS",
+        "detail": "EPSG:32612"
+      },
+      {
+        "check": "transform_correct",
+        "result": "PASS",
+        "detail": "| 10.00, 0.00, 699960.00|\n| 0.00,-10.00, 2900040.00|\n| 0.00, 0.00, 1.00|"
+      },
+      {
+        "check": "resolution_correct",
+        "result": "PASS",
+        "detail": "(10.0, 10.0)"
+      },
+      {
+        "check": "dimensions_correct",
+        "result": "PASS",
+        "detail": "10980x10980"
+      },
+      {
+        "check": "aligned_with_source",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "dtype_float32",
+        "result": "PASS",
+        "detail": "float32"
+      },
+      {
+        "check": "nodata_is_nan",
+        "result": "PASS",
+        "detail": "nan"
+      },
+      {
+        "check": "mask_coherent",
+        "result": "PASS",
+        "detail": "source_invalid=75537840 cog_nan=75537840"
+      },
+      {
+        "check": "dn0_not_valid_reflectance",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "no_silent_transformation",
+        "result": "PASS",
+        "detail": "reflectancia valida sin NaN"
+      },
+      {
+        "check": "no_silent_reprojection",
+        "result": "PASS",
+        "detail": "EPSG:32612"
+      },
+      {
+        "check": "no_unexpected_coverage_loss",
+        "result": "PASS",
+        "detail": "valid=45022560"
+      },
+      {
+        "check": "reflectance_numerically_coherent",
+        "result": "PASS",
+        "detail": "(0,0) dn=4198 expected=0.3198 got=0.3197999894618988; (0,1) dn=4186 expected=0.3186 got=0.31859999895095825; (1,0) dn=4174 expected=0.3174 got=0.3174000084400177; (10979,10979) dn=0 expected=nan got=nan; (5490,5490) dn=0 expected=nan got=nan; DN=1000: no presente en el raster; DN=10000: no presente en el raster; DN=11000@(412,3931) dn=11000 expected=1.0 got=1.0; DN>11000 max=16801@(3191,714) expected=1.5801 got=1.5800999402999878"
+      },
+      {
+        "check": "is_cog_driver",
+        "result": "PASS",
+        "detail": "driver=GTiff"
+      },
+      {
+        "check": "cog_tiled",
+        "result": "PASS",
+        "detail": "(512, 512)"
+      },
+      {
+        "check": "cog_compression",
+        "result": "PASS",
+        "detail": "Compression.deflate"
+      },
+      {
+        "check": "cog_overviews",
+        "result": "PASS",
+        "detail": "[2, 4, 8, 16, 32]"
+      },
+      {
+        "check": "cog_georeferenced",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "sha256_registered",
+        "result": "PASS",
+        "detail": "1528c2b3d87ff7c0c97ae6cbe1e11661072d9d1b6d2010a9938bae46d39522b8"
+      },
+      {
+        "check": "verify_derived",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "check": "catalog_registered",
+        "result": "PASS",
+        "detail": "SENTINEL2_S2MSI2A_20260828T174859_T12RYP_B08_REFL_v1"
+      }
+    ],
+    "all_pass": true
+  }
+]

@@ -188,6 +188,120 @@ class LocalDataStore(DataStore):
         return True
 
     # ------------------------------------------------------------------ #
+    # Productos derivados (S-A.16): storage/derived/<id>/ (mismo contrato V1.0).
+    # ------------------------------------------------------------------ #
+    def _derived_dir(self, deterministic_id: str) -> Path:
+        return self.derived / validate_id(deterministic_id)
+
+    def _derived_manifest_path(self, deterministic_id: str) -> Path:
+        return self._derived_dir(deterministic_id) / MANIFEST_FILENAME
+
+    def _load_derived_manifest(self, deterministic_id: str) -> dict[str, Any]:
+        p = self._derived_manifest_path(deterministic_id)
+        if not p.exists():
+            return {"files": {}}
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def _save_derived_manifest(self, deterministic_id: str, manifest: dict[str, Any]) -> None:
+        _atomic_write_json(self._derived_manifest_path(deterministic_id), manifest)
+
+    def exists_derived(self, deterministic_id: str) -> bool:
+        return self._derived_dir(deterministic_id).exists()
+
+    def put_derived_metadata(self, deterministic_id: str, metadata: dict[str, Any]) -> None:
+        validate_id(deterministic_id)
+        errors = validate_against_contract(metadata)
+        if errors:
+            raise StorageError("metadata INVALID (no se persiste): " + "; ".join(errors))
+
+        final = self._derived_dir(deterministic_id)
+        if final.exists():
+            existing = self.get_derived_metadata(deterministic_id)
+            if existing == metadata:
+                return  # idempotente
+            raise StorageConflictError(f"producto derivado ya existe con contenido distinto: {deterministic_id}")
+
+        staging = self._staging_dir(deterministic_id)
+        staging.mkdir(parents=True, exist_ok=True)
+        try:
+            _atomic_write_json(staging / METADATA_FILENAME, metadata)
+            _atomic_write_json(staging / MANIFEST_FILENAME, {"files": {}})
+            os.replace(staging, final)
+        except Exception:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+
+    def get_derived_metadata(self, deterministic_id: str) -> dict[str, Any] | None:
+        p = self._derived_dir(deterministic_id) / METADATA_FILENAME
+        if not p.exists():
+            return None
+        return json.loads(p.read_text(encoding="utf-8"))
+
+    def delete_derived(self, deterministic_id: str) -> None:
+        p = self._derived_dir(deterministic_id)
+        if p.exists():
+            shutil.rmtree(p)
+        else:
+            raise StorageNotFoundError(f"producto derivado no encontrado: {deterministic_id}")
+
+    def put_derived_file(self, deterministic_id: str, file_meta: FileMetadata, source_path: Path) -> FileMetadata:
+        validate_id(deterministic_id)
+        if not self.exists_derived(deterministic_id):
+            raise StorageNotFoundError(f"producto derivado no encontrado: {deterministic_id}")
+        rel = validate_relative_path(file_meta.relative_path)
+        src = Path(source_path)
+        if not src.is_file():
+            raise StorageError(f"archivo fuente no existe: {src}")
+
+        dest = self._derived_dir(deterministic_id) / "files" / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(dest.suffix + ".tmp")
+        shutil.copy2(src, tmp)
+        size = tmp.stat().st_size
+        sha = _sha256_file(tmp)
+        os.replace(tmp, dest)
+
+        file_meta.relative_path = rel
+        file_meta.filename = Path(rel).name
+        file_meta.size = size
+        file_meta.sha256 = sha
+
+        manifest = self._load_derived_manifest(deterministic_id)
+        manifest.setdefault("files", {})[rel] = file_meta.to_dict()
+        self._save_derived_manifest(deterministic_id, manifest)
+        return file_meta
+
+    def get_derived_file(self, deterministic_id: str, relative_path: str) -> Path | None:
+        rel = validate_relative_path(relative_path)
+        p = self._derived_dir(deterministic_id) / "files" / rel
+        return p if p.is_file() else None
+
+    def verify_derived(self, deterministic_id: str) -> bool:
+        p = self._derived_dir(deterministic_id)
+        if not p.exists():
+            return False
+        meta_path = p / METADATA_FILENAME
+        if not meta_path.is_file():
+            return False
+        try:
+            metadata = json.loads(meta_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return False
+        if validate_against_contract(metadata):
+            return False
+
+        manifest = self._load_derived_manifest(deterministic_id)
+        for rel, fm in manifest.get("files", {}).items():
+            fpath = p / "files" / rel
+            if not fpath.is_file():
+                return False
+            if fm.get("size") is not None and fpath.stat().st_size != fm["size"]:
+                return False
+            if fm.get("sha256") and _sha256_file(fpath) != fm["sha256"]:
+                return False
+        return True
+
+    # ------------------------------------------------------------------ #
     def cleanup_staging(self) -> int:
         removed = 0
         if self.staging.exists():
